@@ -25,27 +25,28 @@ public:
     using value_type = T;
 
     static const size_t n_dim = N;
-    constexpr size_t ndim() { return n_dim; }
 
-    constexpr size_t size() { return data->size(); }
+    constexpr size_t ndim() { return n_dim; }
+    constexpr size_t size() { return desc.size(); }
+
     size_t shape(size_t dim) const { return desc.shape[dim]; }
     const std::array<size_t, N>& shape() const { return desc.shape; }
-    const TensorSlice<N>& descriptor() { return desc; }
+
+    const TensorSlice<N>& descriptor() const { return desc; }
+    const std::array<size_t, N>& get_stride() const { return desc.stride; }
 
     // Iterators over the Tensor
     iterator begin() { return data->begin(); }
     iterator end() { return data->end(); }
-    iterator begin() const { return data->begin(); }
-    iterator end() const { return data->end(); }
+    const_iterator begin() const { return data->begin(); }
+    const_iterator end() const { return data->end(); }
     
     const_iterator cbegin() const { return data->cbegin(); }
     const_iterator cend() const { return data->cend(); }
 
     /* ----------- Constructors ----------- */
     // Default constructor
-    Tensor() = default;
-    // Tensor(const std::shared_ptr<std::vector<T>>& _data, const TensorSlice<N>& _desc)
-    // : data(_data), desc(_desc) {}
+    Tensor() : data(new std::vector<T>()) {}
 
     // Constructor that build Tensor from shapes
     template <typename... Shapes,
@@ -58,18 +59,13 @@ public:
 
     // Constructor that took data from a vector and shapes from a init list
     Tensor(const std::vector<T>& vec, const std::array<size_t, N>& _shape)
-    : data(new std::vector<T>(vec)), desc(size(), _shape) {}
+    : data(new std::vector<T>(vec)), desc(vec.size(), _shape) {}
 
     Tensor(std::vector<T>&& vec, const std::array<size_t, N>& _shape)
     : data(new std::vector<T>(vec)), desc(vec.size(), _shape) {}
 
-    // Constructs from init list
-    Tensor(std::initializer_list<T> list, std::initializer_list<size_t> _shape)
-    : data(new std::vector<T>(list)), desc(list.size(), _shape) {}
-
     // Copy constructor that just take a reference from the given Tensor object.
     Tensor(const Tensor&) = default;
-
 
     // Equality operator that increments the reference counter for rhs's and 
     // decrement for this's (Handled by shared_ptr).
@@ -79,6 +75,14 @@ public:
     Tensor copy();
 
     ~Tensor() = default;
+
+    /* ------- Access Operators --------- */
+    // Access with indices, returns T&
+    template <typename... Indices>
+    T& operator()(Indices...);
+
+    template <typename... Indices>
+    const T& operator()(Indices...) const;
 
     /* ----- Arithmetic operators --------- */
     // An apply utility function that applies F to every element in Tensor
@@ -105,20 +109,23 @@ public:
     Tensor& operator/=(const Tensor&);
     Tensor& operator%=(const Tensor&);
 
-    /* ------- Binary Operators ---------- */
-    Tensor operator+(const Tensor&);
+    /* ------- Binary operations with a scalar ---------- */
+    Tensor operator+(const T&);
+    Tensor operator-(const T&);
+    Tensor operator*(const T&);
+    Tensor operator/(const T&);
+    Tensor operator%(const T&);
 
-    /* ------- Access Operators --------- */
-    // Access with indices, returns T&
-    template <typename... Indices>
-    T& operator()(Indices...);
+    /* ------- Binary operations with a tensor ---------- */
+    Tensor operator+(const Tensor&);
+    Tensor operator-(const Tensor&);
+    Tensor operator*(const Tensor&);
+    Tensor operator/(const Tensor&);
+    Tensor operator%(const Tensor&);
 
     /* --------- Debug ------------ */
     template <typename U, size_t M>
     friend std::ostream& operator<<(std::ostream&, const Tensor<U, M>&);
-
-    // template <typename U>
-    // friend std::ostream& operator<< <2> (std::ostream&, const Tensor<U, 2>&);
     
 private:
     TensorSlice<N> desc;

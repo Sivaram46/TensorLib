@@ -31,13 +31,6 @@ constexpr bool Are_size_convertible() {
     return All(Is_convertible<Args, size_t>()...);
 }
 
-template <bool...> struct bool_pack;
-template <bool... v>
-using all_true = std::is_same<bool_pack<true, v...>, bool_pack<v..., true>>;
-
-/* template <class... Args>
-using Size_convertible = std::enable_if_t<all_true<std::is_convertible<Args, std::size_t>{}...>{}> */
-
 }
 
 #endif

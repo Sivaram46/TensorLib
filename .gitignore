@@ -1,9 +1,9 @@
 # VS code configuration folder
 .vscode/
 
-# C++ binary files
+# C++ binary files and executable files
 *.o
 a.out
 
-# Output file from vs code's debugger
-main
+# Debugging file and its binaries
+main*

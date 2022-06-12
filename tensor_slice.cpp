@@ -11,12 +11,7 @@
 namespace LA {
 
 template <size_t N>
-TensorSlice<N>::TensorSlice(size_t _sz, const std::array<size_t, N>& _shape) 
-: sz(_sz) {
-    // Copy the shape values
-    std::copy(_shape.begin(), _shape.end(), shape.begin());
-
-    // Stride Calculation
+void TensorSlice<N>::_calculate_stride() {
     stride[0] = shape[1];
     stride[1] = 1;
     stride[2] = shape[0] * shape[1];
@@ -27,6 +22,14 @@ TensorSlice<N>::TensorSlice(size_t _sz, const std::array<size_t, N>& _shape)
 }
 
 template <size_t N>
+TensorSlice<N>::TensorSlice(size_t _sz, const std::array<size_t, N>& _shape) 
+: sz(_sz) {
+    // Copy the shape values
+    std::copy(_shape.begin(), _shape.end(), shape.begin());
+    _calculate_stride();
+}
+
+template <size_t N>
 template <typename... Dims>
 TensorSlice<N>::TensorSlice(Dims... dims) {
     static_assert(sizeof...(dims) == N, "Dimensions Mismatch");
@@ -34,20 +37,12 @@ TensorSlice<N>::TensorSlice(Dims... dims) {
     std::array<size_t, N> _shape { size_t(dims)... };
 
     std::copy(_shape.begin(), _shape.end(), shape.begin());
-    // Stride Calculation
-    stride[0] = shape[1];
-    stride[1] = 1;
-    stride[2] = shape[0] * shape[1];
-
-    for (size_t i = 3; i < N; ++i) {
-        stride[i] = stride[i-1] * shape[i-1];
-    }
+    _calculate_stride();
 
     sz = std::accumulate(
         shape.begin(), shape.end(), (size_t) 1, 
         [] (size_t a, size_t b) {return a * b;}
-    );
-    
+    );   
 }
 
 template <size_t N>
@@ -73,7 +68,9 @@ size_t> TensorSlice<N>::operator()(Dims... dims) const {    /* Member signature 
     }
 
     std::array<size_t, N> indices { size_t(dims)... };
-    return start + std::inner_product(indices.begin(), indices.end(), stride.begin(), size_t(0));
+    return start + std::inner_product(
+        indices.begin(), indices.end(), stride.begin(), size_t(0)
+    );
 }
 
 }

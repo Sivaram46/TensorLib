@@ -15,15 +15,9 @@ class TensorSlice
 public:
     template <typename T, size_t M> friend class Tensor;
 
-    TensorSlice() = default;
-    TensorSlice(size_t _sz) : sz(_sz) {}
+    TensorSlice() : sz(0) {}
 
     TensorSlice(size_t, const std::array<size_t, N>&);
-
-    TensorSlice(
-        size_t _sz, const std::array<size_t, N>& _shape, 
-        const std::array<size_t, N>& _stride
-    ) :  sz(_sz), shape(_shape), stride(_stride) {}
 
     // Constructor that takes all the shape
     template<typename... Dims>
@@ -36,12 +30,9 @@ public:
         All(Is_convertible<Dims, size_t>()...),
     size_t> operator()(Dims...) const;
 
-    // A utility function that checks whether the given indices are within the
-    // shape bounds.
-    template <typename... Indices>
-    bool _check_bound(Indices...) const;
 
     void set_offset(size_t off) { start = off; }
+    const size_t get_offset() const { return start; }
 
     constexpr size_t size() { return sz; }
 
@@ -50,6 +41,12 @@ private:
     size_t start = 0;
     std::array<size_t, N> shape;
     std::array<size_t, N> stride;
+    
+    void _calculate_stride();
+    // A utility function that checks whether the given indices are within the
+    // shape bounds.
+    template <typename... Indices>
+    bool _check_bound(Indices...) const;
 };
 
 // A TensorSlice specialization for 1D tensor. Here the elements are just
@@ -58,7 +55,9 @@ template<>
 class TensorSlice<1>
 {
 public:
-    TensorSlice() = default;
+    template <typename T, size_t M> friend class Tensor;
+
+    TensorSlice() : shape(0) {}
     TensorSlice(size_t _shape) : shape(_shape) {}
     size_t operator()(size_t idx) const {
         if (idx >= shape) {
@@ -67,6 +66,9 @@ public:
         return start + idx; 
     }
     void set_offset(size_t off) { start = off; }
+    const size_t get_offset() const { return start; }
+
+    constexpr size_t size() { return shape; }
     
 private:
     size_t shape;
@@ -78,9 +80,15 @@ template <>
 class TensorSlice<2>
 {
 public:
-    TensorSlice() = default;
+    template <typename T, size_t M> friend class Tensor;
+
+    TensorSlice() : sz(0) {}
+
+    TensorSlice(size_t _sz, const std::array<size_t, 2>& _shape)
+    : sz(_sz), shape(_shape), stride({_shape[1], 1}) {}
+
     TensorSlice(size_t row, size_t col)
-    : shape({row, col}), stride({col, 1}) {}
+    : sz(row * col), shape({row, col}), stride({col, 1}) {}
 
     size_t operator()(size_t _row, size_t _col) const {
         if (_row >= shape[0] || _col >= shape[1]) {
@@ -90,8 +98,12 @@ public:
     }
 
     void set_offset(size_t off) { start = off; }
+    const size_t get_offset() const { return start; }
+
+    constexpr size_t size() { return sz; }
 
 private:
+    size_t sz;
     std::array<size_t, 2> stride;
     std::array<size_t, 2> shape;
     size_t start = 0;
