@@ -1,17 +1,17 @@
-#ifndef LA_TENSOR_SLICE_CPP
-#define LA_TENSOR_SLICE_CPP
+#ifndef LA_TENSOR_DESCRIPTOR_CPP
+#define LA_TENSOR_DESCRIPTOR_CPP
 
 #include <numeric>
 #include <algorithm>
 #include <array>
 #include <exception>
 
-#include "tensor_slice.hpp"
+#include "tensor_descriptor.hpp"
 
 namespace LA {
 
 template <size_t N>
-void TensorSlice<N>::_calculate_stride() {
+void TensorDescriptor<N>::_calculate_stride() {
     stride[0] = shape[1];
     stride[1] = 1;
     stride[2] = shape[0] * shape[1];
@@ -22,7 +22,7 @@ void TensorSlice<N>::_calculate_stride() {
 }
 
 template <size_t N>
-TensorSlice<N>::TensorSlice(size_t _sz, const std::array<size_t, N>& _shape) 
+TensorDescriptor<N>::TensorDescriptor(size_t _sz, const std::array<size_t, N>& _shape) 
 : sz(_sz) {
     // Copy the shape values
     std::copy(_shape.begin(), _shape.end(), shape.begin());
@@ -31,7 +31,7 @@ TensorSlice<N>::TensorSlice(size_t _sz, const std::array<size_t, N>& _shape)
 
 template <size_t N>
 template <typename... Dims>
-TensorSlice<N>::TensorSlice(Dims... dims) {
+TensorDescriptor<N>::TensorDescriptor(Dims... dims) {
     static_assert(sizeof...(dims) == N, "Dimensions Mismatch");
 
     std::array<size_t, N> _shape { size_t(dims)... };
@@ -47,7 +47,7 @@ TensorSlice<N>::TensorSlice(Dims... dims) {
 
 template <size_t N>
 template <typename... Indices>
-bool TensorSlice<N>::_check_bound(Indices... indices) const {
+bool TensorDescriptor<N>::_check_bound(Indices... indices) const {
     std::array<size_t, N> idx { size_t(indices)... };
     for (size_t i = 0; i < N; ++i) {
         if (idx[i] >= shape[i]) {
@@ -61,7 +61,7 @@ template <size_t N>
 template <typename... Dims>
 std::enable_if_t<
     All(Is_convertible<Dims, size_t>()...),
-size_t> TensorSlice<N>::operator()(Dims... dims) const {    /* Member signature */
+size_t> TensorDescriptor<N>::operator()(Dims... dims) const {    /* Member signature */
     static_assert(sizeof...(dims) == N, "");
     if (!_check_bound(dims...)) {
         throw std::out_of_range("Index out of range");

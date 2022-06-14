@@ -6,15 +6,15 @@
 #include <vector>
 #include <initializer_list>
 
-#include "tensor_slice.hpp"
+#include "tensor_descriptor.hpp"
 #include "utils.cpp"
 
 #include <iostream>
 
 namespace LA {
 
-// Forward declaration of TensorSlice
-template <size_t N> class TensorSlice; 
+// Forward declaration of TensorDescriptor
+template <size_t N> class TensorDescriptor; 
 
 template <typename T, size_t N>
 class Tensor 
@@ -32,7 +32,7 @@ public:
     size_t shape(size_t dim) const { return desc.shape[dim]; }
     const std::array<size_t, N>& shape() const { return desc.shape; }
 
-    const TensorSlice<N>& descriptor() const { return desc; }
+    const TensorDescriptor<N>& descriptor() const { return desc; }
     const std::array<size_t, N>& get_stride() const { return desc.stride; }
 
     // Iterators over the Tensor
@@ -47,6 +47,9 @@ public:
     /* ----------- Constructors ----------- */
     // Default constructor
     Tensor() : data(new std::vector<T>()) {}
+
+    Tensor(std::shared_ptr<std::vector<T>> _data, const TensorDescriptor<N>& _desc)
+    : data(_data), desc(_desc) {}
 
     // Constructor that build Tensor from shapes
     template <typename... Shapes,
@@ -128,7 +131,7 @@ public:
     friend std::ostream& operator<<(std::ostream&, const Tensor<U, M>&);
     
 private:
-    TensorSlice<N> desc;
+    TensorDescriptor<N> desc;
     std::shared_ptr<std::vector<T>> data;
 };
 
