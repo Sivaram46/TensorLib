@@ -2,7 +2,8 @@
 .vscode/
 
 # Debugging file and its binaries
-main*
+test
+main
 
 # Prerequisites
 *.d

@@ -1,9 +1,7 @@
 #include <vector>
 #include <iostream>
 
-#include "tensor.cpp"
-#include "tensor_descriptor.cpp"
-#include "utils.cpp"
+#include "tensor_include.hpp"
 
 using namespace std;
 
