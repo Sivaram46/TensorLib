@@ -23,9 +23,7 @@ void TensorDescriptor<N>::_calculate_stride() {
 
 template <size_t N>
 TensorDescriptor<N>::TensorDescriptor(size_t _sz, const std::array<size_t, N>& _shape) 
-: sz(_sz) {
-    // Copy the shape values
-    std::copy(_shape.begin(), _shape.end(), shape.begin());
+: sz(_sz), shape(_shape) {
     _calculate_stride();
 }
 
@@ -46,9 +44,9 @@ TensorDescriptor<N>::TensorDescriptor(Dims... dims) {
 }
 
 template <size_t N>
-template <typename... Indices>
-bool TensorDescriptor<N>::_check_bound(Indices... indices) const {
-    std::array<size_t, N> idx { size_t(indices)... };
+template <typename... Dims>
+bool TensorDescriptor<N>::_check_bound(Dims... dims) const {
+    std::array<size_t, N> idx { size_t(dims)... };
     for (size_t i = 0; i < N; ++i) {
         if (idx[i] >= shape[i]) {
             return false;
@@ -60,8 +58,8 @@ bool TensorDescriptor<N>::_check_bound(Indices... indices) const {
 template <size_t N>
 template <typename... Dims>
 std::enable_if_t<
-    All(Is_convertible<Dims, size_t>()...),
-size_t> TensorDescriptor<N>::operator()(Dims... dims) const {    /* Member signature */
+    LA::Element_valid<Dims...>(),
+size_t> TensorDescriptor<N>::operator()(Dims... dims) const {
     static_assert(sizeof...(dims) == N, "");
     if (!_check_bound(dims...)) {
         throw std::out_of_range("Index out of range");

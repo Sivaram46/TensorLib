@@ -27,14 +27,13 @@ public:
     // returns the corresponding index in the flat vector.
     template <typename... Dims>
     std::enable_if_t<
-        All(Is_convertible<Dims, size_t>()...),
+        LA::Element_valid<Dims...>(),
     size_t> operator()(Dims...) const;
-
 
     void set_offset(size_t off) { start = off; }
     const size_t get_offset() const { return start; }
 
-    constexpr size_t size() { return sz; }
+    constexpr size_t size() const { return sz; }
 
 private:
     size_t sz;
@@ -45,8 +44,8 @@ private:
     void _calculate_stride();
     // A utility function that checks whether the given indices are within the
     // shape bounds.
-    template <typename... Indices>
-    bool _check_bound(Indices...) const;
+    template <typename... Dims>
+    bool _check_bound(Dims...) const;
 };
 
 // A TensorDescriptor specialization for 1D tensor. Here the elements are just
@@ -68,7 +67,7 @@ public:
     void set_offset(size_t off) { start = off; }
     const size_t get_offset() const { return start; }
 
-    constexpr size_t size() { return shape; }
+    constexpr size_t size() const { return shape; }
     
 private:
     size_t shape;
@@ -100,7 +99,7 @@ public:
     void set_offset(size_t off) { start = off; }
     const size_t get_offset() const { return start; }
 
-    constexpr size_t size() { return sz; }
+    constexpr size_t size() const { return sz; }
 
 private:
     size_t sz;

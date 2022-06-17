@@ -5,14 +5,15 @@
 #include <type_traits>
 #include <vector>
 #include <initializer_list>
+#include <iostream>
 
 #include "tensor_descriptor.hpp"
 #include "utils.cpp"
-
-#include <iostream>
+#include "slice.cpp"
 
 namespace LA {
 
+using std::size_t;
 // Forward declaration of TensorDescriptor
 template <size_t N> class TensorDescriptor; 
 
@@ -26,11 +27,12 @@ public:
 
     static const size_t n_dim = N;
 
-    constexpr size_t ndim() { return n_dim; }
-    constexpr size_t size() { return desc.size(); }
+    constexpr size_t ndim() const { return n_dim; }
+    constexpr size_t size() const { return desc.size(); }
 
     size_t shape(size_t dim) const { return desc.shape[dim]; }
     const std::array<size_t, N>& shape() const { return desc.shape; }
+    constexpr bool empty() const { return !size(); }
 
     const TensorDescriptor<N>& descriptor() const { return desc; }
     const std::array<size_t, N>& get_stride() const { return desc.stride; }
@@ -81,11 +83,14 @@ public:
 
     /* ------- Access Operators --------- */
     // Access with indices, returns T&
-    template <typename... Indices>
-    T& operator()(Indices...);
+    template <typename... Dims>
+    T& operator()(Dims...);
 
-    template <typename... Indices>
-    const T& operator()(Indices...) const;
+    template <typename... Dims>
+    const T& operator()(Dims...) const;
+
+    Tensor operator()(const Slice&);
+    const Tensor operator()(const Slice&) const;
 
     /* ----- Arithmetic operators --------- */
     // An apply utility function that applies F to every element in Tensor

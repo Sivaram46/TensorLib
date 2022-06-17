@@ -12,15 +12,49 @@ Tensor<T, N> Tensor<T, N>::copy() {
 
 /* -------- Access operators ----------- */
 template <typename T, size_t N>
-template <typename... Indices> 
-T& Tensor<T, N>::operator()(Indices... indices) {
-    return (*data)[desc(indices...)];
+template <typename... Dims>
+T& Tensor<T, N>::operator()(Dims... dims) {
+    return (*data)[desc(dims...)];
 }
 
 template <typename T, size_t N>
-template <typename... Indices> 
-const T& Tensor<T, N>::operator()(Indices... indices) const {
-    return (*data)[desc(indices...)];
+template <typename... Dims>
+const T& Tensor<T, N>::operator()(Dims... dims) const {
+    return (*data)[desc(dims...)];
+}
+
+template <typename T, size_t N>
+Tensor<T, N> Tensor<T, N>::operator()(const Slice& sl) {
+    if (N != sl.ranges.size()) {
+        throw std::logic_error("Dimensions Mismatch");
+    }
+
+    size_t st = 0, _sz = 0;
+
+    auto& orig = desc;
+    TensorDescriptor<N> des(orig);
+
+    for (size_t i = 0; i < N; ++i) {
+        size_t low = sl.ranges[i].low, high = sl.ranges[i].high;
+        if (low >= high) {
+            throw std::logic_error("`low` range should be lesser than the `high` range");
+        }
+        if (high > orig.shape[i]) {
+            throw std::out_of_range("Index out of range");
+        }
+
+        st += low * orig.stride[i];
+        des.shape[i] = high - low;
+        _sz += (high - low);
+
+        if (sl.ranges[i].single()) {
+            des.stride[i] = 0;
+        }
+    }
+
+    des.start += st;
+    des.sz = _sz;
+    return Tensor(data, des);
 }
 
 template <typename T, size_t N>
@@ -177,6 +211,10 @@ Tensor<T, N> Tensor<T, N>::operator%(const Tensor<T, N>& tensor) {
 /* --------- Debug ------------ */
 template <typename T, size_t N>
 std::ostream& operator<<(std::ostream& out, const Tensor<T, N>& x) {
+    if (x.empty()) {
+        return out << "[]";
+    }
+
     switch (N) {
         case 0: {
             out << x.data;
@@ -184,52 +222,34 @@ std::ostream& operator<<(std::ostream& out, const Tensor<T, N>& x) {
         }
 
         case 1: {
-            if (!x.data) {
-                out << "[]";
+            out << "[";
+            for (auto& elem : *x.data) {
+                out << elem << ", ";
             }
-            else {
-                out << "[";
-                for (auto& elem : *x.data) {
-                    out << elem << ", ";
-                }
-                out << "\b\b]";
-            }
-
+            out << "\b\b]";
             break;
         }
 
         case 2: {
-            if (!x.data) {
-                out << "[]";
-                break;
-            }
-            else {
-                for (size_t i = 0; i < x.shape(0); ++i) {
-                    for (size_t j = 0; j < x.shape(1); ++j) {
-                        auto stride = x.get_stride();
-                        size_t idx = i * stride[0] + j * stride[1] + x.desc.get_offset();
-                        out << (*x.data)[idx] << " ";
-                    }
-                    if (i < x.shape(0)-1) {
-                        out << "\n";
-                    }
+            for (size_t i = 0; i < x.shape(0); ++i) {
+                for (size_t j = 0; j < x.shape(1); ++j) {
+                    auto stride = x.get_stride();
+                    size_t idx = i * stride[0] + j * stride[1] + x.desc.get_offset();
+                    out << (*x.data)[idx] << " ";
+                }
+                if (i < x.shape(0)-1) {
+                    out << "\n";
                 }
             }
-
             break;
         }
 
         default: {
-            if (!x.data) {
-                out << "[]";
+            out << "[";
+            for (auto& elem : *x.data) {
+                out << elem << ", ";
             }
-            else {
-                out << "[";
-                for (auto& elem : *x.data) {
-                    out << elem << ", ";
-                }
-                out << "\b\b]";
-            }
+            out << "\b\b]";
         }
 
     }
