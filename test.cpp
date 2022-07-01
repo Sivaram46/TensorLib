@@ -9,11 +9,11 @@ int main()
 {
     vector<double> vec = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 
-    LA::Tensor<double, 2> ten1 (vec, {3, 4});
-    LA::Tensor<double, 2> ten2 (2, 3);
+    TL::Tensor<double, 2> ten1 (vec, {3, 4});
+    TL::Tensor<double, 2> ten2 (2, 3);
     ten2 = 4.0;
 
-    LA::Tensor<double, 2> ten3 = ten1 / 2.0;
+    TL::Tensor<double, 2> ten3 = ten1 / 2.0;
     ten1(0, 0) = 10;
 
     cout << ten1 << "\n\n";
@@ -21,8 +21,8 @@ int main()
     // cout << ten2 << "\n\n";
     // cout << ten3 << "\n\n";
 
-    using R = LA::Range;
-    using LA::Slice;
+    using R = TL::Range;
+    using TL::Slice;
     auto roi = ten1(Slice(R(3), R(1, 3)));
     cout << roi << "\n\n";
     cout << "Shape: " << roi.shape(0) << " " << roi.shape(1) << "\n\n";

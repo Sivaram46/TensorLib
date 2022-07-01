@@ -3,7 +3,7 @@ A multi-dimensional C++ tensor library which provides compile time tensor for ar
 
 ## Usage
 ```cpp
-using LA::Tensor;
+using TL::Tensor;
 
 /* Construct by elements and shape. */
 Tensor<double, 2> ten({0, 1, 2, 4, 5, 6}, {2, 3});
@@ -23,9 +23,9 @@ ten(0, 1) = 10;     // elem = 10
 /* Can be used in an arithmetic expressions. */
 auto ten2 = ten + (ten * 2);
 
-/* Can be sliced usign LA::Slice and LA::Range. */
-using LA::Slice;
-using R = LA::Range;
+/* Can be sliced usign TL::Slice and TL::Range. */
+using TL::Slice;
+using R = TL::Range;
 auto rect = ten(Slice(1, R(2)));    // == ten[1, :2]
 
 /* Slicing returns a reference to the original tensor. */
@@ -40,7 +40,7 @@ The library can be compiled and ran by,
 #include "tensor_include.hpp"
 
 int main() {
-    LA::Tensor<double, 2> ten;
+    TL::Tensor<double, 2> ten;
     ...
 }
 ```

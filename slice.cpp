@@ -6,15 +6,15 @@
 #include "range.cpp"
 #include "utils.cpp"
 
-namespace LA {
+namespace TL {
 
 /**
- * Slice class that takes @a LA::Range and size_t and stores the ranges that will 
+ * Slice class that takes @a TL::Range and size_t and stores the ranges that will 
  * be used for tesnor slicing.
  */
 struct Slice {
     template <typename... Dims,
-        typename = std::enable_if_t<LA::Slice_valid<Dims...>()>
+        typename = std::enable_if_t<TL::Slice_valid<Dims...>()>
     >
     Slice(Dims... dims) { put_range(dims...); }
     std::vector<Range> ranges;

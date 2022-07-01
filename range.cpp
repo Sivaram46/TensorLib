@@ -1,11 +1,11 @@
 #ifndef LA_RANGE_CPP
 #define LA_RANGE_CPP
 
-namespace LA {
+namespace TL {
 
 /**
  * Range class that can be used to select elements in some range. Can be used
- * as param of @a LA::Slice.
+ * as param of @a TL::Slice.
  */
 struct Range {
     size_t low, high;

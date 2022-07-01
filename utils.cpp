@@ -3,7 +3,7 @@
 
 #include <type_traits>
 
-namespace LA {
+namespace TL {
 
 using std::size_t;
 struct Range;
@@ -44,8 +44,8 @@ constexpr bool Slice_valid() {
     /* First, some of the arguments should be convertible to Range. Then other
     params should be convertible to size_t. That can be done by taking OR of 
     Is_same(Args, Range) and Is_convertible(Args, size_t). */
-    return Some(Is_same<Args, LA::Range>()...) &&
-        All((Is_same<Args, LA::Range>() || Is_convertible<Args, size_t>())...);
+    return Some(Is_same<Args, TL::Range>()...) &&
+        All((Is_same<Args, TL::Range>() || Is_convertible<Args, size_t>())...);
 }
 
 template <typename... Args>

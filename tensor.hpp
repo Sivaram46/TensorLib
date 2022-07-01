@@ -11,7 +11,7 @@
 #include "utils.cpp"
 #include "slice.cpp"
 
-namespace LA {
+namespace TL {
 
 using std::size_t;
 // Forward declaration of TensorDescriptor
@@ -126,7 +126,7 @@ public:
     /**
      * @brief Access tensor from slices.
      * @param Slice An object that takes two kinds of params, 1) any type 
-     * convertible to size_t 2) @a LA::Range. @a Range(low,high) access elements as [low, high).
+     * convertible to size_t 2) @a TL::Range. @a Range(low,high) access elements as [low, high).
      * Any one of the param should be @a Range. Otherwise won't be compiled.
      * @throws @a std::logic_error when Slice and tensor dimensions mismatch.
      * @throws @a std::out_of_range when Indices passed to slices goes out of range.

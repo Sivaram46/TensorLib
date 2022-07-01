@@ -5,7 +5,7 @@
 
 #include "utils.cpp"
 
-namespace LA {
+namespace TL {
 
 template <typename T, size_t N> class Tensor;
 
@@ -48,7 +48,7 @@ public:
      */
     template <typename... Dims>
     std::enable_if_t<
-        LA::Element_valid<Dims...>(),
+        TL::Element_valid<Dims...>(),
     size_t> operator()(Dims...) const;
 
     void set_offset(size_t off) { start = off; }

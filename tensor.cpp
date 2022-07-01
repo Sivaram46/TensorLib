@@ -3,7 +3,7 @@
 
 #include "tensor.hpp"
 
-namespace LA {
+namespace TL {
 
 template <typename T, size_t N>
 Tensor<T, N> Tensor<T, N>::copy() {

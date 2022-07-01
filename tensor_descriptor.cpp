@@ -8,7 +8,7 @@
 
 #include "tensor_descriptor.hpp"
 
-namespace LA {
+namespace TL {
 
 template <size_t N>
 void TensorDescriptor<N>::_calculate_stride() {
@@ -71,7 +71,7 @@ bool TensorDescriptor<N>::_check_bound(Dims... dims) const {
 template <size_t N>
 template <typename... Dims>
 std::enable_if_t<
-    LA::Element_valid<Dims...>(),
+    TL::Element_valid<Dims...>(),
 size_t> TensorDescriptor<N>::operator()(Dims... dims) const {
     static_assert(sizeof...(dims) == N, "");
     if (!_check_bound(dims...)) {
