@@ -51,10 +51,12 @@ $ ./main
 
 TODOs
 - [x] Tensor slice
+- [ ] Iterator over the tensor
+- [ ] Printing tensors
+- [ ] Tensor.reverse() 
 - [ ] Tensor specialization for Matrix
 - [ ] matmul(), transpose()
 - [ ] squeeze(), expand_dims(), reshape()
 - [ ] Binary operations on type different tensors
-- [ ] Pretty printing tensors
 - [ ] CMake file for setting up the library in some machine
 - [ ] Running time tensors

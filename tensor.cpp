@@ -31,19 +31,27 @@ Tensor<T, N> Tensor<T, N>::operator()(const Slice& sl) {
 
     size_t st = 0, _sz = 0;
 
-    auto& orig = desc;
-    TensorDescriptor<N> des(orig);
+    TensorDescriptor<N> des(desc);
 
+    /* Logic:
+        If a single size_t n is given for a Slice param, then it would be converted
+        to Range(n, n+1)
+
+        Start or offset for the new tensor slice would be the product of range's
+        low and its corresponding stride. 
+
+        Shape would be range's high minus low.
+    */
     for (size_t i = 0; i < N; ++i) {
         size_t low = sl.ranges[i].low, high = sl.ranges[i].high;
         if (low >= high) {
             throw std::logic_error("`low` range should be lesser than the `high` range");
         }
-        if (high > orig.shape[i]) {
+        if (high > desc.shape[i]) {
             throw std::out_of_range("Index out of range");
         }
 
-        st += low * orig.stride[i];
+        st += low * desc.stride[i];
         des.shape[i] = high - low;
         _sz += (high - low);
 
@@ -78,7 +86,6 @@ Tensor<T, N>& Tensor<T, N>::_apply(const Tensor<T, N>& tensor, F func) {
     return *this;
 }
 
-// Assign to a scalar
 template <typename T, size_t N>
 Tensor<T, N>& Tensor<T, N>::operator=(const T& val) {
     return _apply([&] (T& elem) {elem = val;});

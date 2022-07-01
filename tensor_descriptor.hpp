@@ -9,22 +9,43 @@ namespace LA {
 
 template <typename T, size_t N> class Tensor;
 
+/**
+ * A TensorDescriptor class that holds the stride and shape information for a 
+ * tensor of dimension @a N.
+ */
 template <size_t N>
 class TensorDescriptor
 {
 public:
     template <typename T, size_t M> friend class Tensor;
 
+    /** 
+     * The default constructor. Sets the size of the Tensor to 0.
+     */
     TensorDescriptor() : sz(0) {}
 
+    /** 
+     * @brief Constructor that takes the total size and shape along each dimension.
+     * @param sz The total size of the tensor.
+     * @param shape An array of size N. The shape of the tensor along each dimension.
+     */
     TensorDescriptor(size_t, const std::array<size_t, N>&);
 
-    // Constructor that takes all the shape
+    /** 
+     * @brief Constructor that takes only shape information.
+     * @param Dims... The shape of the Tensor along each dimension.
+     */
     template<typename... Dims>
     TensorDescriptor(Dims...);
 
-    // Function that takes the individual indices along each dimension and 
-    // returns the corresponding index in the flat vector.
+    /**
+     * @brief Function to return the corresponding index in flat vector given the
+     * indices in Tensor.
+     * @param Dims... Indices along each dimension. Should all be convertible to 
+     * size_t
+     * @return The index of element in flat vector.
+     * @throw std::out_of_range if any of the given indices out of range. 
+     */
     template <typename... Dims>
     std::enable_if_t<
         LA::Element_valid<Dims...>(),
@@ -33,6 +54,9 @@ public:
     void set_offset(size_t off) { start = off; }
     const size_t get_offset() const { return start; }
 
+    /**
+     * Total number of elements in the tensor.
+     */
     constexpr size_t size() const { return sz; }
 
 private:
@@ -41,15 +65,23 @@ private:
     std::array<size_t, N> shape;
     std::array<size_t, N> stride;
     
+    /**
+     * @brief A utility function that calculates and updates the stride info
+     * given the shape info.
+     */
     void _calculate_stride();
-    // A utility function that checks whether the given indices are within the
-    // shape bounds.
+
+    /** @brief A utility function that checks whether the given indices are within the
+    * shape bounds. 
+    * @param Dims... Indices along each dimension.
+    * @return A predicate depending on validity of given indices.
+    */
     template <typename... Dims>
     bool _check_bound(Dims...) const;
 };
 
-// A TensorDescriptor specialization for 1D tensor. Here the elements are just
-// represented as flat vectors.
+/* A TensorDescriptor specialization for 1D tensor. Here the elements are just
+represented as flat vectors. */
 template<>
 class TensorDescriptor<1>
 {
@@ -71,40 +103,6 @@ public:
     
 private:
     size_t shape;
-    size_t start = 0;
-};
-
-// A TensorDescriptor specialization for 2D tensor that is for a Matrix.
-template <>
-class TensorDescriptor<2>
-{
-public:
-    template <typename T, size_t M> friend class Tensor;
-
-    TensorDescriptor() : sz(0) {}
-
-    TensorDescriptor(size_t _sz, const std::array<size_t, 2>& _shape)
-    : sz(_sz), shape(_shape), stride({_shape[1], 1}) {}
-
-    TensorDescriptor(size_t row, size_t col)
-    : sz(row * col), shape({row, col}), stride({col, 1}) {}
-
-    size_t operator()(size_t _row, size_t _col) const {
-        if (_row >= shape[0] || _col >= shape[1]) {
-            throw std::out_of_range("Index out of range");
-        }
-        return start + (_row * stride[0] + _col * stride[1]);
-    }
-
-    void set_offset(size_t off) { start = off; }
-    const size_t get_offset() const { return start; }
-
-    constexpr size_t size() const { return sz; }
-
-private:
-    size_t sz;
-    std::array<size_t, 2> stride;
-    std::array<size_t, 2> shape;
     size_t start = 0;
 };
 
