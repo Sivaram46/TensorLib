@@ -8,13 +8,14 @@
 #include <iostream>
 
 #include "tensor_descriptor.hpp"
+#include "tensor_iterator.hpp"
 #include "utils.cpp"
 #include "slice.cpp"
 
 namespace TL {
 
 using std::size_t;
-// Forward declaration of TensorDescriptor
+
 template <size_t N> class TensorDescriptor; 
 
 /**
@@ -24,8 +25,8 @@ template <typename T, size_t N>
 class Tensor 
 {
 public:
-    using iterator = typename std::vector<T>::iterator;
-    using const_iterator = typename std::vector<T>::const_iterator;
+    using iterator = TensorIterator<T, N>;
+    using const_iterator = const TensorIterator<T, N>;
     using value_type = T;
 
     static const size_t n_dim = N;
@@ -37,21 +38,33 @@ public:
     const std::array<size_t, N>& shape() const { return desc.shape; }
     constexpr bool empty() const { return !size(); }
 
-    const TensorDescriptor<N>& descriptor() const { return desc; }
-    const std::array<size_t, N>& get_stride() const { return desc.stride; }
+    const std::array<size_t, N>& strides() const { return desc.stride; }
 
     /* ---------- Iterators over the Tensor ---------- */
     /**
      * Returns a forward iterator over the data. Iterator of the underlying std::vector.
      * It is not advisable to call this on sub-matrices.
      */
-    iterator begin() { return data->begin(); }
-    iterator end() { return data->end(); }
-    const_iterator begin() const { return data->begin(); }
-    const_iterator end() const { return data->end(); }
+    iterator begin() { 
+        return TensorIterator<T, N>(*this); 
+    }
+    iterator end() { 
+        return TensorIterator<T, N>(*this, desc.size()); 
+    }
+
+    const_iterator begin() const { 
+        return TensorIterator<T, N>(*this);
+    }
+    const_iterator end() const { 
+        return TensorIterator<T, N>(*this, desc.size()); 
+    }
     
-    const_iterator cbegin() const { return data->cbegin(); }
-    const_iterator cend() const { return data->cend(); }
+    const_iterator cbegin() const { 
+        return TensorIterator<T, N>(*this); 
+    }
+    const_iterator cend() const {
+        return TensorIterator<T, N>(*this, desc.size()); 
+    }
 
     /* ---------- Constructors ---------- */
     /* The default constructor */
@@ -62,14 +75,14 @@ public:
 
     /**
      * @brief Constructor that build Tensor from shapes. This constructs an empty tensor.
-     * @param Shapes... should all be convertible to size_t, otherwise the constructor
+     * @param Dims... should all be convertible to size_t, otherwise the constructor
      * won't be enabled at compile time.
      */
-    template <typename... Shapes,
-        typename = std::enable_if_t<All(Is_convertible<Shapes, size_t>()...)>
+    template <typename... Dims,
+        typename = std::enable_if_t<All(Is_convertible<Dims, size_t>()...)>
     >
-    Tensor(Shapes... shapes)
-    : desc(shapes...) {
+    Tensor(Dims... dims)
+    : desc(dims...) {
         data = std::make_shared<std::vector<T>>(desc.size());
     }
 
@@ -88,6 +101,8 @@ public:
      */
     Tensor(std::vector<T>&& vec, const std::array<size_t, N>& _shape)
     : data(new std::vector<T>(vec)), desc(vec.size(), _shape) {}
+
+    Tensor(TL::Range, const std::array<size_t, N>&);
 
     /**
      * @brief Default copy constructor that just take a reference from the given Tensor object. 
@@ -188,6 +203,8 @@ public:
     /* --------- Debug ------------ */
     template <typename U, size_t M>
     friend std::ostream& operator<<(std::ostream&, const Tensor<U, M>&);
+
+    friend class TensorIterator<T, N>;
     
 private:
     TensorDescriptor<N> desc;
