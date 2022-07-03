@@ -1,0 +1,12 @@
+TODOs
+- [x] Tensor slice
+- [x] Iterator over the tensor
+- [ ] Printing tensors
+- [ ] Tensor.reshape(), ravel()
+- [ ] matmul(), transpose()
+- [ ] Tensor.reverse() 
+- [ ] Runtime tensors
+- [ ] CMake file for setting up the library in some machine
+- [ ] Tensor specialization for Matrix
+- [ ] squeeze(), expand_dims()
+- [ ] Binary operations on type different tensors

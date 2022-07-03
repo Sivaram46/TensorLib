@@ -1,5 +1,5 @@
-#ifndef LA_TENSOR_HEADER
-#define LA_TENSOR_HEADER
+#ifndef TENSORLIB_TENSOR_HEADER
+#define TENSORLIB_TENSOR_HEADER
 
 #include <memory>
 #include <type_traits>
@@ -13,10 +13,6 @@
 #include "slice.cpp"
 
 namespace TL {
-
-using std::size_t;
-
-template <size_t N> class TensorDescriptor; 
 
 /**
  * A compile time tensor of type @a T and dimension @a N
@@ -41,6 +37,7 @@ public:
     const std::array<size_t, N>& strides() const { return desc.stride; }
 
     /* ---------- Iterators over the Tensor ---------- */
+
     /**
      * Returns a forward iterator over the data. Iterator of the underlying std::vector.
      * It is not advisable to call this on sub-matrices.
@@ -67,6 +64,7 @@ public:
     }
 
     /* ---------- Constructors ---------- */
+
     /* The default constructor */
     Tensor() : data(new std::vector<T>()) {}
 
@@ -124,6 +122,7 @@ public:
     ~Tensor() = default;
 
     /* ---------- Access Operators ---------- */
+
     /**
      * @brief Access tensor elements from indices. Returns a lvalue reference.
      * @param Dims... should all be convertible to size_t.
@@ -147,6 +146,7 @@ public:
      * @throws @a std::out_of_range when Indices passed to slices goes out of range.
      */
     Tensor operator()(const Slice&);
+
     /**
      * @brief Constant version of accessing from slices.
      */
@@ -169,17 +169,20 @@ public:
     Tensor& _apply(const Tensor&, F);
 
     /* ---------- Arithmetic operators ---------- */
+
     /* Assign to a scalar */
     Tensor& operator=(const T&);
 
-    // Operate with scalars
+    /* ---------- Operate with scalars --------- */
+
     Tensor& operator+=(const T&);
     Tensor& operator-=(const T&);
     Tensor& operator*=(const T&);
     Tensor& operator/=(const T&);
     Tensor& operator%=(const T&);
 
-    // Operate with Tensors
+    /* ---------- Operate with Tensors ---------- */
+
     Tensor& operator+=(const Tensor&);
     Tensor& operator-=(const Tensor&);
     Tensor& operator*=(const Tensor&);
@@ -187,6 +190,7 @@ public:
     Tensor& operator%=(const Tensor&);
 
     /* ------- Binary operations with a scalar ---------- */
+
     Tensor operator+(const T&);
     Tensor operator-(const T&);
     Tensor operator*(const T&);
@@ -194,6 +198,7 @@ public:
     Tensor operator%(const T&);
 
     /* ------- Binary operations with a tensor ---------- */
+
     Tensor operator+(const Tensor&);
     Tensor operator-(const Tensor&);
     Tensor operator*(const Tensor&);
@@ -201,6 +206,7 @@ public:
     Tensor operator%(const Tensor&);
 
     /* --------- Debug ------------ */
+    
     template <typename U, size_t M>
     friend std::ostream& operator<<(std::ostream&, const Tensor<U, M>&);
 

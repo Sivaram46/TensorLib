@@ -1,5 +1,5 @@
-#ifndef LA_TENSOR_ITERATOR_CPP
-#define LA_TENSOR_ITERATOR_CPP
+#ifndef TENSORLIB_TENSOR_ITERATOR_CPP
+#define TENSORLIB_TENSOR_ITERATOR_CPP
 
 #include <exception>
 #include "tensor_iterator.hpp"

@@ -1,5 +1,5 @@
-#ifndef LA_TENSOR_UTILS
-#define LA_TENSOR_UTILS
+#ifndef TENSORLIB_TENSOR_UTILS
+#define TENSORLIB_TENSOR_UTILS
 
 #include <type_traits>
 

@@ -1,12 +1,12 @@
-#ifndef LA_TENSOR_CPP
-#define LA_TENSOR_CPP
+#ifndef TENSORLIB_TENSOR_CPP
+#define TENSORLIB_TENSOR_CPP
 
 #include "tensor.hpp"
 
 namespace TL {
 
 template <typename T, size_t N>
-Tensor<T, N>::Tensor(TL::Range r, const std::array<size_t, N>& _shape) 
+Tensor<T, N>::Tensor(Range r, const std::array<size_t, N>& _shape) 
 : desc(r.high - r.low, _shape) {
     std::vector<T> tmp(desc.size());
     for (int i = r.low; i < r.high; ++i) {
@@ -22,6 +22,7 @@ Tensor<T, N> Tensor<T, N>::copy() {
 }
 
 /* -------- Access operators ----------- */
+
 template <typename T, size_t N>
 template <typename... Dims>
 T& Tensor<T, N>::operator()(Dims... dims) {
@@ -135,6 +136,7 @@ Tensor<T, N>& Tensor<T, N>::operator=(const T& val) {
 }
 
 /* ------------ Scalar Operations ----------- */
+
 template <typename T, size_t N>
 Tensor<T, N>& Tensor<T, N>::operator+=(const T& val) {
     return _apply([&] (T& elem) {elem += val;});
@@ -161,6 +163,7 @@ Tensor<T, N>& Tensor<T, N>::operator%=(const T& val) {
 }
 
 /* ----------- Tensor Operations -------------- */
+
 template <typename T, size_t N>
 Tensor<T, N>& Tensor<T, N>::operator+=(const Tensor<T, N>& tensor) {
     return _apply(tensor, [] (T& t1, const T& t2) { t1 += t2; });
@@ -187,6 +190,7 @@ Tensor<T, N>& Tensor<T, N>::operator%=(const Tensor<T, N>& tensor) {
 }
 
 /* -------- Binary Operations with a scalar ------------- */
+
 template <typename T, size_t N>
 Tensor<T, N> Tensor<T, N>::operator+(const T& val) {
     auto lhs = this->copy();
@@ -223,6 +227,7 @@ Tensor<T, N> Tensor<T, N>::operator%(const T& val) {
 }
 
 /* ------- Binary Operations with a tensor --------------- */
+
 template <typename T, size_t N>
 Tensor<T, N> Tensor<T, N>::operator+(const Tensor<T, N>& tensor) {
     auto lhs = this->copy();
@@ -259,6 +264,7 @@ Tensor<T, N> Tensor<T, N>::operator%(const Tensor<T, N>& tensor) {
 }
 
 /* --------- Debug ------------ */
+
 template <typename T, size_t N>
 std::ostream& operator<<(std::ostream& out, const Tensor<T, N>& x) {
     if (x.empty()) {
@@ -273,7 +279,7 @@ std::ostream& operator<<(std::ostream& out, const Tensor<T, N>& x) {
 
         case 1: {
             out << "[";
-            for (auto& elem : *x.data) {
+            for (auto& elem : x) {
                 out << elem << ", ";
             }
             out << "\b\b]";
@@ -296,7 +302,7 @@ std::ostream& operator<<(std::ostream& out, const Tensor<T, N>& x) {
 
         default: {
             out << "[";
-            for (auto& elem : *x.data) {
+            for (auto& elem : x) {
                 out << elem << ", ";
             }
             out << "\b\b]";
