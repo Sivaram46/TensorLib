@@ -15,6 +15,6 @@ struct Range {
     bool single() const { return low + 1 == high; }
 };
 
-}
+}   // namespace TL
 
 #endif

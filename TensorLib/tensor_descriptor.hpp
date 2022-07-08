@@ -10,6 +10,8 @@ namespace TL {
 template <typename T, size_t N> class Tensor;
 template <typename T, size_t N> class TensorIterator;
 
+namespace internal {
+
 /**
  * A TensorDescriptor class that holds the stride and shape information for a 
  * tensor of dimension @a N.
@@ -18,8 +20,8 @@ template <size_t N>
 class TensorDescriptor
 {
 public:
-    template <typename T, size_t M> friend class Tensor;
-    template <typename T, size_t M> friend class TensorIterator;
+    template <typename T, size_t M> friend class TL::Tensor;
+    template <typename T, size_t M> friend class TL::TensorIterator;
 
     /** 
      * The default constructor. Sets the size of the Tensor to 0.
@@ -88,7 +90,7 @@ template<>
 class TensorDescriptor<1>
 {
 public:
-    template <typename T, size_t M> friend class Tensor;
+    template <typename T, size_t M> friend class TL::Tensor;
     // template <typename T, size_t M> friend class TensorIterator;
 
     TensorDescriptor() : shape(0) {}
@@ -109,6 +111,8 @@ private:
     size_t start = 0;
 };
 
-}
+}   // namespace interanl
+
+}   // namespace TL
 
 #endif

@@ -10,6 +10,8 @@
 
 namespace TL {
 
+namespace internal {
+
 template <size_t N>
 void TensorDescriptor<N>::_calculate_stride() {
     /* Logic:
@@ -79,6 +81,8 @@ size_t> TensorDescriptor<N>::operator()(Dims... dims) const {
     );
 }
 
-}
+}   // namespace internal
+
+}   // namespace TL
 
 #endif

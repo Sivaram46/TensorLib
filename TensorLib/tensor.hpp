@@ -68,7 +68,7 @@ public:
     /* The default constructor */
     Tensor() : data(new std::vector<T>()) {}
 
-    Tensor(std::shared_ptr<std::vector<T>> _data, const TensorDescriptor<N>& _desc)
+    Tensor(std::shared_ptr<std::vector<T>> _data, const TL::internal::TensorDescriptor<N>& _desc)
     : data(_data), desc(_desc) {}
 
     /**
@@ -205,7 +205,7 @@ public:
     Tensor operator/(const Tensor&);
     Tensor operator%(const Tensor&);
 
-    /* --------- Debug ------------ */
+    /* --------- Printing / Formatting tensor ------------ */
     
     template <typename U, size_t M>
     friend std::ostream& operator<<(std::ostream&, const Tensor<U, M>&);
@@ -213,10 +213,10 @@ public:
     friend class TensorIterator<T, N>;
     
 private:
-    TensorDescriptor<N> desc;
+    TL::internal::TensorDescriptor<N> desc;
     std::shared_ptr<std::vector<T>> data;
 };
 
-}
+}   // namespace TL
 
 #endif

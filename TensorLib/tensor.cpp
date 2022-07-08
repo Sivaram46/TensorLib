@@ -43,7 +43,7 @@ Tensor<T, N> Tensor<T, N>::operator()(const Slice& sl) {
 
     size_t st = 0, _sz = 1;
 
-    TensorDescriptor<N> des(desc);
+    TL::internal::TensorDescriptor<N> des(desc);
 
     /* Logic:
         If a single size_t n is given for a Slice param, then it would be converted
@@ -85,7 +85,7 @@ const Tensor<T, N> Tensor<T, N>::operator()(const Slice& sl) const {
 
     size_t st = 0, _sz = 1;
 
-    TensorDescriptor<N> des(desc);
+    TL::internal::TensorDescriptor<N> des(desc);
     for (size_t i = 0; i < N; ++i) {
         size_t low = sl.ranges[i].low, high = sl.ranges[i].high;
         if (low >= high) {
@@ -313,6 +313,6 @@ std::ostream& operator<<(std::ostream& out, const Tensor<T, N>& x) {
     return out;
 }
 
-}
+}   // namespace TL
 
 #endif

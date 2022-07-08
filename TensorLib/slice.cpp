@@ -49,6 +49,6 @@ void Slice::put_range(size_t s, Dims... dims) {
     put_range(dims...);
 }
 
-}
+}   // namespace TL
 
 #endif

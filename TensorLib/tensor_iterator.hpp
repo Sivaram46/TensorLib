@@ -9,8 +9,10 @@ namespace TL {
 template <typename T, size_t N>
 class Tensor;
 
-template <size_t N>
-class TensorDescriptor;
+namespace internal {
+    template <size_t N>
+    class TensorDescriptor;
+}
 
 /**
  * @b TensorIterator which iterates over the tensor as the tensor is a flattened 
@@ -62,7 +64,7 @@ public:
 
 private:
     std::weak_ptr<std::vector<T>> data;
-    TensorDescriptor<N> desc;
+    TL::internal::TensorDescriptor<N> desc;
     size_t offset;
 
     /**
@@ -73,6 +75,6 @@ private:
     std::shared_ptr<std::vector<T>> _check() const;
 };
 
-}
+}   // namespace TL
 
 #endif

@@ -56,6 +56,6 @@ constexpr bool Element_valid() {
 template <bool B, typename T>
 using Enable_if = typename std::enable_if<B, T>::type;
 
-}
+}   // namespace TL
 
 #endif

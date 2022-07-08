@@ -149,6 +149,6 @@ bool TensorIterator<T, N>::operator!=(const TensorIterator& rhs) const {
     return !(*this == rhs);
 }
 
-}
+}   // namespace TL
 
 #endif
