@@ -1,10 +1,9 @@
-#ifndef LA_SLICE_CPP
-#define LA_SLICE_CPP
+#ifndef TENSORLIB_SLICE_CPP
+#define TENSORLIB_SLICE_CPP
 
 #include <type_traits>
 #include <vector>
 #include "range.cpp"
-#include "utils.cpp"
 
 namespace TL {
 

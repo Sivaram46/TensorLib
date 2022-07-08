@@ -1,5 +1,5 @@
-#ifndef LA_TENSOR_DESCRIPTOR_CPP
-#define LA_TENSOR_DESCRIPTOR_CPP
+#ifndef TENSORLIB_TENSOR_DESCRIPTOR_CPP
+#define TENSORLIB_TENSOR_DESCRIPTOR_CPP
 
 #include <numeric>
 #include <algorithm>

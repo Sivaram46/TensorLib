@@ -1,11 +1,11 @@
-#ifndef LA_RANGE_CPP
-#define LA_RANGE_CPP
+#ifndef TENSORLIB_RANGE_CPP
+#define TENSORLIB_RANGE_CPP
 
 namespace TL {
 
 /**
  * Range class that can be used to select elements in some range. Can be used
- * as param of @a TL::Slice.
+ * as param of @a TL::Slice and in a tensor constructor.
  */
 struct Range {
     size_t low, high;
