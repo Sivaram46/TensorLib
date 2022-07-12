@@ -1,6 +1,11 @@
+#ifndef TENSORLIB_TENSOR_PRINT_CPP
+#define TENSORLIB_TENSOR_PRINT_CPP
+
 #include <iostream>
 #include <array>
 #include <sstream>
+
+#include "tensor_formatter.cpp"
 
 namespace TL {
     
@@ -20,6 +25,7 @@ private:
     const Tensor<T, N>& tensor;
 
     size_t calculate_width() const;
+    void basic_print(std::stringstream&) const;
 };
 
 template <typename T, size_t N>
@@ -35,11 +41,12 @@ size_t TensorPrint<T, N>::calculate_width() const {
         max_width = std::max(max_width, static_cast<size_t>(element.tellp()));
     }
     
+    max_width = std::min(max_width, static_cast<size_t> (tensor.format.precision));
     return max_width;
 }
 
 template <typename T, size_t N>
-void TensorPrint<T, N>::print() const {
+void TensorPrint<T, N>::basic_print(std::stringstream& element) const {
     std::array<size_t, N> stride;
     stride[N - 1] = 1;
     /* Calculate temporary stride for the tensor */
@@ -47,14 +54,14 @@ void TensorPrint<T, N>::print() const {
         stride[i] = stride[i + 1] * tensor.shape(i);
     }
 
-    auto format = tensor.get_format();
-
-    std::stringstream element;
+    auto format = tensor.format;
     size_t size = tensor.size();
+    auto width = calculate_width();
+
     typename Tensor<T, N>::iterator it = tensor.begin();
     for (size_t i = 0; i < size; ++i, ++it) {
         element.str(std::string());
-        element.width(calculate_width());
+        element.width(width);
 
         long matched = 0;
         /* Logic:
@@ -109,6 +116,45 @@ void TensorPrint<T, N>::print() const {
     }
 }
 
+template <typename T, size_t N>
+void TensorPrint<T, N>::print() const {
+    std::stringstream element;
+    auto format = tensor.format;
+
+    // Set floating precision
+    if (format.precision >= 0) {
+        element.precision(format.precision);
+    }
+
+    // Set float modes
+    switch (format.float_mode)
+    {
+    case TensorFormatter::FloatMode::Default:
+        element << std::defaultfloat;
+        break;
+
+    case TensorFormatter::FloatMode::Fixed:
+        element << std::fixed;
+        break;
+
+    case TensorFormatter::FloatMode::Scientific:
+        element << std::scientific;
+        break;
+    }
+
+    // TODO: Function to print only summary
+
+    if (format.linewidth < 0) {
+        basic_print(element);
+        return;
+    }
+    else {
+        // TODO: Logic for printing given linewidth
+    }
+}
+
 }   // namespace internal
 
 }   // namespace TL
+
+#endif

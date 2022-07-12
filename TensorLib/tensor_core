@@ -2,3 +2,4 @@
 #include "tensor_descriptor.cpp"
 #include "tensor_iterator.cpp"
 #include "utils.cpp"
+#include "tensor_formatter.cpp"

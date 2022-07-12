@@ -55,7 +55,9 @@ int main()
     cout << range_ten << "\n";
 
     TL::Tensor<double, 3> one_element(1, 3, 1);
-    one_element = 3.1415;
+    one_element = 3.1415926;
+    one_element.format.precision = 5;
+    // one_element.format.float_mode = TL::TensorFormatter::FloatMode::Fixed;
     one_element(0, 0, 0) = 0; 
     cout << one_element << "\n";
 

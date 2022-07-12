@@ -214,17 +214,13 @@ public:
     template <typename U, size_t M>
     friend std::ostream& operator<<(std::ostream&, const Tensor<U, M>&);
 
-    TensorFormatter get_format() const { return format; }
-    void set_format(const TensorFormatter& _format) {
-        format = _format;
-    }
-
     friend class TensorIterator<T, N>;
+    
+    TensorFormatter format;
     
 private:
     TL::internal::TensorDescriptor<N> desc;
     std::shared_ptr<std::vector<T>> data;
-    TensorFormatter format;
 };
 
 }   // namespace TL
