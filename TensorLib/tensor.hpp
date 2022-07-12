@@ -9,6 +9,8 @@
 
 #include "tensor_descriptor.hpp"
 #include "tensor_iterator.hpp"
+#include "tensor_print.cpp"
+#include "tensor_formatter.cpp"
 #include "utils.cpp"
 #include "slice.cpp"
 
@@ -206,15 +208,23 @@ public:
     Tensor operator%(const Tensor&);
 
     /* --------- Printing / Formatting tensor ------------ */
+
+    void print(std::ostream&) const;
     
     template <typename U, size_t M>
     friend std::ostream& operator<<(std::ostream&, const Tensor<U, M>&);
+
+    TensorFormatter get_format() const { return format; }
+    void set_format(const TensorFormatter& _format) {
+        format = _format;
+    }
 
     friend class TensorIterator<T, N>;
     
 private:
     TL::internal::TensorDescriptor<N> desc;
     std::shared_ptr<std::vector<T>> data;
+    TensorFormatter format;
 };
 
 }   // namespace TL

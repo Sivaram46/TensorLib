@@ -263,53 +263,23 @@ Tensor<T, N> Tensor<T, N>::operator%(const Tensor<T, N>& tensor) {
     return lhs;
 }
 
-/* --------- Debug ------------ */
+/* --------- Printing / Formatting tensor ------------ */
+template <typename T, size_t N>
+void Tensor<T, N>::print(std::ostream& out) const {
+    TL::internal::TensorPrint<T, N> pr (out, *this);
+    pr.print();
+}
 
 template <typename T, size_t N>
-std::ostream& operator<<(std::ostream& out, const Tensor<T, N>& x) {
-    if (x.empty()) {
-        return out << "[]";
+std::ostream& operator<<(std::ostream& out, const Tensor<T, N>& tensor) {
+    if (tensor.empty()) {
+        out << std::string(N, '[')
+            << std::string(N, ']')
+            << '\n';
+        return out;
     }
 
-    switch (N) {
-        case 0: {
-            out << x.data;
-            break;
-        }
-
-        case 1: {
-            out << "[";
-            for (auto& elem : x) {
-                out << elem << ", ";
-            }
-            out << "\b\b]";
-            break;
-        }
-
-        case 2: {
-            for (size_t i = 0; i < x.shape(0); ++i) {
-                for (size_t j = 0; j < x.shape(1); ++j) {
-                    auto stride = x.strides();
-                    size_t idx = i * stride[0] + j * stride[1] + x.desc.get_offset();
-                    out << (*x.data)[idx] << " ";
-                }
-                if (i < x.shape(0)-1) {
-                    out << "\n";
-                }
-            }
-            break;
-        }
-
-        default: {
-            out << "[";
-            for (auto& elem : x) {
-                out << elem << ", ";
-            }
-            out << "\b\b]";
-        }
-
-    }
-
+    tensor.print(out);
     return out;
 }
 

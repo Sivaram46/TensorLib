@@ -16,7 +16,7 @@ int main()
     TL::Tensor<double, 2> ten3 = ten1 / 2.0;
     ten1(0, 0) = 10;
 
-    cout << ten1 << "\n\n";
+    cout << ten1;
     cout << "Shape: " << ten1.shape(0) << " " << ten1.shape(1) << "\n\n";
     // cout << ten2 << "\n\n";
     // cout << ten3 << "\n\n";
@@ -39,7 +39,7 @@ int main()
 
     cout << string(50, '-') << "\n";
     
-    const TL::Tensor<int, 3> range_ten(R(60), {3, 4, 5});
+    TL::Tensor<int, 3> range_ten(R(60), {3, 4, 5});
     auto sliced = range_ten(Slice(R(1, 3), R(3), R(2, 5))); // range_ten[1:3, :3, 2:]
 
     auto it = sliced.begin() + sliced.size();
@@ -51,4 +51,13 @@ int main()
     }
     cout << "\n";
 
+    range_ten(0, 0, 0) = 100;
+    cout << range_ten << "\n";
+
+    TL::Tensor<double, 3> one_element(1, 3, 1);
+    one_element = 3.1415;
+    one_element(0, 0, 0) = 0; 
+    cout << one_element << "\n";
+
+    cout << TL::Tensor<int, 4>() << "\n";
 }
