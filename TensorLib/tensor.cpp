@@ -7,7 +7,7 @@ namespace TL {
 
 template <typename T, size_t N>
 Tensor<T, N>::Tensor(Range r, const std::array<size_t, N>& _shape) 
-: desc(r.high - r.low, _shape) {
+: desc(_shape) {
     std::vector<T> tmp(desc.size());
     for (int i = r.low; i < r.high; ++i) {
         tmp[i] = i;
@@ -107,6 +107,30 @@ const Tensor<T, N> Tensor<T, N>::operator()(const Slice& sl) const {
     des.start += st;
     des.sz = _sz;
     return Tensor(data, des);
+}
+
+template <typename T, size_t N>
+Tensor<T, N-1> Tensor<T, N>::operator[](size_t idx) {
+    if (idx >= desc.shape[0]) {
+        throw std::out_of_range("Index out of range");
+    }
+
+    std::array<size_t, N-1> sh;
+    std::copy(desc.shape.begin() + 1, desc.shape.end(), sh.begin());
+    TL::internal::TensorDescriptor<N-1> tdesc(sh, desc.stride[0] * idx);
+    return Tensor<T, N-1>(data, tdesc);
+}
+
+template <typename T, size_t N>
+const Tensor<T, N-1> Tensor<T, N>::operator[](size_t idx) const {
+    if (idx >= desc.shape[0]) {
+        throw std::out_of_range("Index out of range");
+    }
+
+    std::array<size_t, N-1> sh;
+    std::copy(desc.shape.begin() + 1, desc.shape.end(), sh.begin());
+    TL::internal::TensorDescriptor<N-1> tdesc(sh, desc.stride[0] * idx);
+    return Tensor<T, N-1>(data, tdesc);
 }
 
 template <typename T, size_t N>

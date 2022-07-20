@@ -33,7 +33,7 @@ public:
      * @param sz The total size of the tensor.
      * @param shape An array of size N. The shape of the tensor along each dimension.
      */
-    TensorDescriptor(size_t, const std::array<size_t, N>&);
+    TensorDescriptor(const std::array<size_t, N>&, size_t = 0);
 
     /** 
      * @brief Constructor that takes only shape information.
@@ -54,9 +54,6 @@ public:
     std::enable_if_t<
         TL::Element_valid<Dims...>(),
     size_t> operator()(Dims...) const;
-
-    void set_offset(size_t off) { start = off; }
-    const size_t get_offset() const { return start; }
 
     /**
      * Total number of elements in the tensor.
@@ -82,33 +79,6 @@ private:
     */
     template <typename... Dims>
     bool _check_bound(Dims...) const;
-};
-
-/* A TensorDescriptor specialization for 1D tensor. Here the elements are just
-represented as flat vectors. */
-template<>
-class TensorDescriptor<1>
-{
-public:
-    template <typename T, size_t M> friend class TL::Tensor;
-    // template <typename T, size_t M> friend class TensorIterator;
-
-    TensorDescriptor() : shape(0) {}
-    TensorDescriptor(size_t _shape) : shape(_shape) {}
-    size_t operator()(size_t idx) const {
-        if (idx >= shape) {
-            throw std::out_of_range("Index out of range");
-        }
-        return start + idx; 
-    }
-    void set_offset(size_t off) { start = off; }
-    const size_t get_offset() const { return start; }
-
-    constexpr size_t size() const { return shape; }
-    
-private:
-    size_t shape;
-    size_t start = 0;
 };
 
 }   // namespace interanl

@@ -94,13 +94,13 @@ public:
      * @param _shape Shape of the tensor to build. Shape and #of elements in vector should match. 
      */
     Tensor(const std::vector<T>& vec, const std::array<size_t, N>& _shape)
-    : data(new std::vector<T>(vec)), desc(vec.size(), _shape) {}
+    : data(new std::vector<T>(vec)), desc(_shape) {}
 
     /**
      * @brief Move version of the above constructor.
      */
     Tensor(std::vector<T>&& vec, const std::array<size_t, N>& _shape)
-    : data(new std::vector<T>(vec)), desc(vec.size(), _shape) {}
+    : data(new std::vector<T>(vec)), desc(_shape) {}
 
     Tensor(TL::Range, const std::array<size_t, N>&);
 
@@ -153,6 +153,19 @@ public:
      * @brief Constant version of accessing from slices.
      */
     const Tensor operator()(const Slice&) const;
+
+    /** 
+     * @brief Subscript operator. It also returns a reference to the tensor along
+     * its 0th dimension.
+     * @param idx The index to be chosen.
+     * @throw std::out_of_range when index goes out of range.
+     */
+    Tensor<T, N-1> operator[](size_t);
+
+    /** 
+     * @brief Constant version of subscript indexing. 
+     */
+    const Tensor<T, N-1> operator[](size_t) const;
 
     /**
      * @brief An utility function that applies @a F to every element in the tensor.

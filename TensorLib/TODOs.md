@@ -6,10 +6,12 @@ TODOs
     - Fixed, scientific and precision for double
     - Linewidths
     - Print only summary
-- [ ] operator[]
+- [x] operator[]
+- [ ] 0 dimensional tensor
 - [ ] Tensor.reshape(), ravel()
 - [ ] matmul(), transpose()
 - [ ] Tensor.reverse() 
+- [ ] Braced initiazation list
 - [ ] Runtime tensors
 - [ ] CMake file for setting up the library in some machine
 - [ ] Tensor specialization for Matrix
@@ -18,3 +20,4 @@ TODOs
 
 Bugs:
 - [ ] Const iterator
+- [ ] operator[] for N <= 1

@@ -26,14 +26,20 @@ void TensorDescriptor<N>::_calculate_stride() {
         t_n-i = t_n-i-1 * s_n-i-1
     */
     stride[N - 1] = 1;
-    for (int i = N-2; i >= 0; --i) {
+    for (long i = N-2; i >= 0; --i) {
         stride[i] = stride[i+1] * shape[i+1]; 
     }
 }
 
 template <size_t N>
-TensorDescriptor<N>::TensorDescriptor(size_t _sz, const std::array<size_t, N>& _shape) 
-: sz(_sz), shape(_shape) {
+TensorDescriptor<N>::TensorDescriptor(
+    const std::array<size_t, N>& _shape, size_t _st
+) 
+: shape(_shape), start(_st) {
+    sz = std::accumulate(
+        shape.begin(), shape.end(), static_cast<size_t> (1), 
+        [] (size_t a, size_t b) {return a * b;}
+    );
     _calculate_stride();
 }
 
@@ -48,7 +54,7 @@ TensorDescriptor<N>::TensorDescriptor(Dims... dims) {
     _calculate_stride();
 
     sz = std::accumulate(
-        shape.begin(), shape.end(), (size_t) 1, 
+        shape.begin(), shape.end(), static_cast<size_t> (1), 
         [] (size_t a, size_t b) {return a * b;}
     );   
 }
