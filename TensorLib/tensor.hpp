@@ -8,7 +8,6 @@
 #include <iostream>
 
 #include "tensor_descriptor.hpp"
-#include "tensor_iterator.hpp"
 #include "tensor_print.cpp"
 #include "tensor_formatter.cpp"
 #include "utils.cpp"
@@ -23,8 +22,11 @@ template <typename T, size_t N>
 class Tensor 
 {
 public:
-    using iterator = TensorIterator<T, N>;
-    using const_iterator = const TensorIterator<T, N>;
+    template <bool Const> 
+    class TensorIterator;
+
+    using iterator = TensorIterator<false>;
+    using const_iterator = TensorIterator<true>;
     using value_type = T;
 
     static const size_t n_dim = N;
@@ -42,28 +44,16 @@ public:
 
     /**
      * Returns a forward iterator over the data. Iterator of the underlying std::vector.
-     * It is not advisable to call this on sub-matrices.
+     * Iterators should be bounded to any tensor before it can be used.
      */
-    iterator begin() { 
-        return TensorIterator<T, N>(*this); 
-    }
-    iterator end() { 
-        return TensorIterator<T, N>(*this, desc.size()); 
-    }
+    iterator begin();
+    iterator end();
 
-    const_iterator begin() const { 
-        return TensorIterator<T, N>(*this);
-    }
-    const_iterator end() const { 
-        return TensorIterator<T, N>(*this, desc.size()); 
-    }
+    const_iterator begin() const;
+    const_iterator end() const;
     
-    const_iterator cbegin() const { 
-        return TensorIterator<T, N>(*this); 
-    }
-    const_iterator cend() const {
-        return TensorIterator<T, N>(*this, desc.size()); 
-    }
+    const_iterator cbegin() const;
+    const_iterator cend() const;
 
     /* ---------- Constructors ---------- */
 
@@ -227,7 +217,7 @@ public:
     template <typename U, size_t M>
     friend std::ostream& operator<<(std::ostream&, const Tensor<U, M>&);
 
-    friend class TensorIterator<T, N>;
+    // friend class TensorIterator<T, N>;
     
     TensorFormatter format;
     

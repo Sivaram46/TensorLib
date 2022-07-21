@@ -1,65 +1,135 @@
 #include <vector>
 #include <iostream>
+#include <cassert>
 
 #include "../TensorLib/tensor_core"
 
 using namespace std;
 
-int main()
+using R = TL::Range;
+using Slice = TL::Slice;
+void test_constructs()
 {
-    vector<double> vec = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+    // Constructs by std::vector
+    vector<int> vec = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+    TL::Tensor<int, 2> A (vec, {3, 4});  // A of shape (3, 4)
 
-    TL::Tensor<double, 2> ten1 (vec, {3, 4});
-    TL::Tensor<double, 2> ten2 (2, 3);
-    ten2 = 4.0;
+    // Constructs empty tensor of given shape
+    TL::Tensor<double, 2> B (2, 3);     // B of shape (2, 3)
+    B = 4.0;
 
-    TL::Tensor<double, 2> ten3 = ten1 / 2.0;
-    ten1(0, 0) = 10;
+    // Constructs by TL::Range
+    TL::Tensor<int, 3> C (R(24), {2, 3, 4});
 
-    cout << ten1;
-    cout << "Shape: " << ten1.shape(0) << " " << ten1.shape(1) << "\n\n";
-    // cout << ten2 << "\n\n";
-    // cout << ten3 << "\n\n";
+    // Copy constructor - makes a reference
+    TL::Tensor<int, 2> copy (A);
+    copy(0, 1) = 100;
+}
 
-    using R = TL::Range;
-    using TL::Slice;
-    // auto roi = ten1(Slice(R(3), R(1, 3)));
-    // cout << roi << "\n\n";
-    // cout << "Shape: " << roi.shape(0) << " " << roi.shape(1) << "\n\n";
-    
-    // auto roi2 = roi(Slice(R(1), R(2)));
-    // cout << roi2 << "\n\n";
-    // cout << "Shape: " << roi2.shape(0) << " " << roi2.shape(1) << "\n\n";
+void test_arithmetic_op()
+{
+    TL::Tensor<int, 2> A(R(6), {2, 3}), B(2, 3);
+    B = 3;
+    auto C = (A / B) + (A * 2);
+    C -= 4;
+}
 
-    // auto roi3 = roi2(Slice(0, R(0, 1)));
-    // cout << roi3 << "\n\n";
-    // cout << "Shape: " << roi3.shape(0) << " " << roi3.shape(1) << "\n\n";
+void test_slice()
+{
+    TL::Tensor<int, 3> A(R(60), {3, 4, 5});
+    auto A1 = A(Slice(R(1, 3), R(3), 2)); // [1:3, :3, 2]
+    auto A2 = A1(Slice(R(2), 0, 0));
 
-    // roi3(0,0) = 100;
+    // Using operator[]
+    auto B1 = A[1][0];
+}
 
-    cout << string(50, '-') << "\n";
-    
-    TL::Tensor<int, 3> range_ten(R(60), {3, 4, 5});
-    auto sliced = range_ten(Slice(R(1, 3), R(3), R(2, 5))); // range_ten[1:3, :3, 2:]
+void test_iterator()
+{
+    // Arithmetic and deref operations of iterator
+    TL::Tensor<int, 3> A(R(60), {3, 4, 5});
+    auto it = A.begin();
+    assert(*it == 0);
 
-    auto it = sliced.begin() + sliced.size();
-    auto it2 = sliced.end();
-    cout << (it == it2) << "\n";
+    it++;
+    assert(*it == 1);
 
-    for (auto it = sliced.begin(); it != sliced.end(); ++it) {
-        cout << *it << " ";
+    it += 10;
+    assert(*it == 11);
+
+    it = it - 5;
+    assert(*it == 6);
+
+    // it will point to A.end() and it shouldn't be deferenced.
+    it = A.begin();
+    assert(it + A.size() == A.end());
+
+    try {
+        it = A.begin() - 1;
+    } catch(std::out_of_range& e) {
+        cout << e.what() << "\n";
     }
-    cout << "\n";
 
-    range_ten(0, 0, 0) = 100;
-    cout << range_ten << "\n";
+    // Equality operators
+    it = A.begin();
+    ++it;
+    auto it2 = A.begin() + 1;
+    assert(it == it2);
 
-    TL::Tensor<double, 3> one_element(1, 3, 1);
-    one_element = 3.1415926;
-    one_element.format.precision = 5;
-    // one_element.format.float_mode = TL::TensorFormatter::FloatMode::Fixed;
-    one_element(0, 0, 0) = 0; 
-    cout << one_element << "\n";
+    it2--;
+    assert(it != it2);
 
-    cout << TL::Tensor<int, 4>() << "\n";
+    // Range for loop
+    for(auto& elem : A) {}
+}
+
+void test_const_iterator()
+{
+    TL::Tensor<int, 2> A (R(8), {2, 4});
+    const TL::Tensor<int, 2> B (R(8), {2, 4});
+    auto cit = A.cbegin();
+    cit++;
+    assert(*cit == 1);
+
+    auto cit2 = B.begin();
+    cit2 += 2;
+    assert(*cit2 == 2);
+}
+
+void test_print()
+{
+    TL::Tensor<int, 3> A(R(60), {3, 4, 5});
+    A(0, 0, 0) = 100;
+    cout    << "A = \n"
+            << A
+            << "\n";
+    
+    TL::Tensor<double, 3> B(1, 3, 1);
+    B = 3.1415926;
+    auto default_format = B.format;
+    B.format.precision = 4;
+    cout    << "B = \n"
+            << B
+            << "\n";
+        
+    // Printing empty tensor
+    cout    << "Empty Tensor: "
+            << TL::Tensor<int, 4>()
+            << "\n";
+
+    B.format = default_format;
+    B.format.float_mode = TL::TensorFormatter::FloatMode::Scientific;
+    cout    << "Scientific float format\n"
+            << B
+            << "\n";
+}
+
+int main()
+{   
+    test_constructs();
+    test_arithmetic_op();
+    test_slice();
+    test_iterator();
+    test_const_iterator();
+    test_print();
 }

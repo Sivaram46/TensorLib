@@ -3,11 +3,9 @@
 
 #include <memory>
 #include <vector>
+#include "tensor.hpp"
 
 namespace TL {
-
-template <typename T, size_t N>
-class Tensor;
 
 namespace internal {
     template <size_t N>
@@ -20,7 +18,8 @@ namespace internal {
  * appropriate exceptions whenever the iterator goes out of bound.
  */
 template <typename T, size_t N>
-class TensorIterator 
+template <bool Const>
+class Tensor<T, N>::TensorIterator 
 {
 public:
     /**
@@ -54,10 +53,21 @@ public:
     TensorIterator operator+(size_t);
     TensorIterator operator-(size_t);
 
-    T& operator*();
-    const T& operator*() const;
-    T* operator->();
-    const T* operator->() const;
+    template <bool Q = Const>
+    std::enable_if_t<!Q, T&> 
+    operator*();
+
+    template <bool Q = Const>
+    std::enable_if_t<Q, const T&>
+    operator*() const;
+
+    template <bool Q = Const>
+    std::enable_if_t<!Q, T*>
+    operator->();
+
+    template <bool Q = Const>
+    std::enable_if_t<Q, const T*>
+    operator->() const;
 
     bool operator==(const TensorIterator&) const;
     bool operator!=(const TensorIterator&) const;

@@ -19,5 +19,4 @@ TODOs
 - [ ] Binary operations on type different tensors
 
 Bugs:
-- [ ] Const iterator
 - [ ] operator[] for N <= 1

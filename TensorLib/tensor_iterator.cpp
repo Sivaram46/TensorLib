@@ -7,7 +7,8 @@
 namespace TL {
 
 template <typename T, size_t N>
-std::shared_ptr<std::vector<T>> TensorIterator<T, N>::_check() const {
+template <bool Const>
+std::shared_ptr<std::vector<T>> Tensor<T, N>::TensorIterator<Const>::_check() const {
     auto ptr = data.lock();
     if (!ptr) {
         throw std::runtime_error("Unbounded Iterator");
@@ -21,7 +22,8 @@ std::shared_ptr<std::vector<T>> TensorIterator<T, N>::_check() const {
 }
 
 template <typename T, size_t N>
-TensorIterator<T, N>& TensorIterator<T, N>::operator++() {
+template <bool Const>
+Tensor<T, N>::TensorIterator<Const>& Tensor<T, N>::TensorIterator<Const>::operator++() {
     _check();
     if (offset >= desc.size()) {
         throw std::out_of_range("Increment past end");
@@ -31,14 +33,16 @@ TensorIterator<T, N>& TensorIterator<T, N>::operator++() {
 }
 
 template <typename T, size_t N>
-TensorIterator<T, N> TensorIterator<T, N>::operator++(int) {
+template <bool Const>
+Tensor<T, N>::TensorIterator<Const> Tensor<T, N>::TensorIterator<Const>::operator++(int) {
     auto temp = *this;
     ++*this;
     return temp;
 }
 
 template <typename T, size_t N>
-TensorIterator<T, N>& TensorIterator<T, N>::operator--() {
+template <bool Const>
+Tensor<T, N>::TensorIterator<Const>& Tensor<T, N>::TensorIterator<Const>::operator--() {
     _check();
     if (offset == 0) {
         throw std::out_of_range("Decrement past begin");
@@ -48,14 +52,16 @@ TensorIterator<T, N>& TensorIterator<T, N>::operator--() {
 }
 
 template <typename T, size_t N>
-TensorIterator<T, N> TensorIterator<T, N>::operator--(int) {
+template <bool Const>
+Tensor<T, N>::TensorIterator<Const> Tensor<T, N>::TensorIterator<Const>::operator--(int) {
     auto temp = *this;
     --*this;
     return temp;
 }
 
 template <typename T, size_t N>
-TensorIterator<T, N>& TensorIterator<T, N>::operator+=(size_t _off) {
+template <bool Const>
+Tensor<T, N>::TensorIterator<Const>& Tensor<T, N>::TensorIterator<Const>::operator+=(size_t _off) {
     _check();
     if (!(offset + _off <= desc.size())) {
         throw std::out_of_range("Increment past end");
@@ -65,7 +71,8 @@ TensorIterator<T, N>& TensorIterator<T, N>::operator+=(size_t _off) {
 }
 
 template <typename T, size_t N>
-TensorIterator<T, N>& TensorIterator<T, N>::operator-=(size_t _off) {
+template <bool Const>
+Tensor<T, N>::TensorIterator<Const>& Tensor<T, N>::TensorIterator<Const>::operator-=(size_t _off) {
     _check();
     // Check for underflow
     if (_off > offset) {
@@ -76,21 +83,26 @@ TensorIterator<T, N>& TensorIterator<T, N>::operator-=(size_t _off) {
 }
 
 template <typename T, size_t N>
-TensorIterator<T, N> TensorIterator<T, N>::operator+(size_t _off) {
+template <bool Const>
+Tensor<T, N>::TensorIterator<Const> Tensor<T, N>::TensorIterator<Const>::operator+(size_t _off) {
     auto temp = *this;
     temp += _off;
     return temp;
 }
 
 template <typename T, size_t N>
-TensorIterator<T, N> TensorIterator<T, N>::operator-(size_t _off) {
+template <bool Const>
+Tensor<T, N>::TensorIterator<Const> Tensor<T, N>::TensorIterator<Const>::operator-(size_t _off) {
     auto temp = *this;
     temp -= _off;
     return temp;
 }
 
 template <typename T, size_t N>
-T& TensorIterator<T, N>::operator*() {
+template <bool Const>
+template <bool Q>
+std::enable_if_t<!Q, T&>
+Tensor<T, N>::TensorIterator<Const>::operator*() {
     auto ret = _check();
     
     size_t x = 1, idx = 0;
@@ -113,7 +125,10 @@ T& TensorIterator<T, N>::operator*() {
 }
 
 template <typename T, size_t N>
-const T& TensorIterator<T, N>::operator*() const {
+template <bool Const>
+template <bool Q>
+std::enable_if_t<Q, const T&>
+Tensor<T, N>::TensorIterator<Const>::operator*() const {
     auto ret = _check();
     
     size_t x = 1, idx = 0;
@@ -126,27 +141,65 @@ const T& TensorIterator<T, N>::operator*() const {
 }
 
 template <typename T, size_t N>
-T* TensorIterator<T, N>::operator->() {
+template <bool Const>
+template <bool Q>
+std::enable_if_t<!Q, T*>
+Tensor<T, N>::TensorIterator<Const>::operator->() {
     _check();
     return &this->operator*();
 }
 
 template <typename T, size_t N>
-const T* TensorIterator<T, N>::operator->() const {
+template <bool Const>
+template <bool Q>
+std::enable_if_t<Q, const T*>
+Tensor<T, N>::TensorIterator<Const>::operator->() const {
     _check();
     return &this->operator*();
 }
 
 template <typename T, size_t N>
-bool TensorIterator<T, N>::operator==(const TensorIterator& rhs) const {
+template <bool Const>
+bool Tensor<T, N>::TensorIterator<Const>::operator==(const TensorIterator& rhs) const {
     auto ret = _check();
     auto ret_rhs = rhs._check();
     return (offset == rhs.offset) && (ret == ret_rhs);
 }
 
 template <typename T, size_t N>
-bool TensorIterator<T, N>::operator!=(const TensorIterator& rhs) const {
+template <bool Const>
+bool Tensor<T, N>::TensorIterator<Const>::operator!=(const TensorIterator& rhs) const {
     return !(*this == rhs);
+}
+
+template <typename T, size_t N>
+auto Tensor<T, N>::begin() -> iterator {
+    return iterator(*this);
+}
+
+template <typename T, size_t N>
+auto Tensor<T, N>::end() -> iterator {
+    return iterator(*this, size());
+}
+
+template <typename T, size_t N>
+auto Tensor<T, N>::begin() const -> const_iterator {
+    return const_iterator(*this);
+}
+
+template <typename T, size_t N>
+auto Tensor<T, N>::end() const -> const_iterator {
+    return const_iterator(*this, size());
+}
+
+template <typename T, size_t N>
+auto Tensor<T, N>::cbegin() const -> const_iterator {
+    return const_iterator(*this);
+}
+
+template <typename T, size_t N>
+auto Tensor<T, N>::cend() const -> const_iterator {
+    return const_iterator(*this, size());
 }
 
 }   // namespace TL

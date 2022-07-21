@@ -34,7 +34,7 @@ size_t TensorPrint<T, N>::calculate_width() const {
     std::stringstream element;
     size_t max_width = 1;
 
-    typename Tensor<T, N>::iterator it = tensor.begin();
+    typename Tensor<T, N>::const_iterator it = tensor.begin();
     for (; it != tensor.end(); ++it) {
         element.str(std::string());
         element << *it;
@@ -58,7 +58,7 @@ void TensorPrint<T, N>::basic_print(std::stringstream& element) const {
     size_t size = tensor.size();
     auto width = calculate_width();
 
-    typename Tensor<T, N>::iterator it = tensor.begin();
+    typename Tensor<T, N>::const_iterator it = tensor.begin();
     for (size_t i = 0; i < size; ++i, ++it) {
         element.str(std::string());
         element.width(width);
