@@ -5,8 +5,8 @@
 
 namespace TL {
 
-template <typename T, size_t N>
-Tensor<T, N>::Tensor(Range r, const std::array<size_t, N>& _shape) 
+template <typename T>
+Tensor<T>::Tensor(Range r, const std::vector<size_t>& _shape) 
 : desc(_shape) {
     std::vector<T> tmp(desc.size());
     for (int i = r.low; i < r.high; ++i) {
@@ -16,34 +16,34 @@ Tensor<T, N>::Tensor(Range r, const std::array<size_t, N>& _shape)
     data = std::make_shared<std::vector<T>>(tmp);
 }
 
-template <typename T, size_t N>
-Tensor<T, N> Tensor<T, N>::copy() {
+template <typename T>
+Tensor<T> Tensor<T>::copy() {
     return Tensor (*data, desc.shape);
 }
 
 /* -------- Access operators ----------- */
 
-template <typename T, size_t N>
+template <typename T>
 template <typename... Dims>
-T& Tensor<T, N>::operator()(Dims... dims) {
+T& Tensor<T>::operator()(Dims... dims) {
     return (*data)[desc(dims...)];
 }
 
-template <typename T, size_t N>
+template <typename T>
 template <typename... Dims>
-const T& Tensor<T, N>::operator()(Dims... dims) const {
+const T& Tensor<T>::operator()(Dims... dims) const {
     return (*data)[desc(dims...)];
 }
 
-template <typename T, size_t N>
-Tensor<T, N> Tensor<T, N>::operator()(const Slice& sl) {
-    if (N != sl.ranges.size()) {
+template <typename T>
+Tensor<T> Tensor<T>::operator()(const Slice& sl) {
+    if (ndim() != sl.ranges.size()) {
         throw std::runtime_error("Dimensions Mismatch");
     }
 
     size_t st = 0, _sz = 1;
 
-    TL::internal::TensorDescriptor<N> des(desc);
+    TL::internal::TensorDescriptor des(desc);
 
     /* Logic:
         If a single size_t n is given for a Slice param, then it would be converted
@@ -54,7 +54,7 @@ Tensor<T, N> Tensor<T, N>::operator()(const Slice& sl) {
 
         Shape would be range's high minus low.
     */
-    for (size_t i = 0; i < N; ++i) {
+    for (size_t i = 0; i < ndim(); ++i) {
         size_t low = sl.ranges[i].low, high = sl.ranges[i].high;
         if (low >= high) {
             throw std::runtime_error("`low` range should be lesser than the `high` range");
@@ -77,16 +77,16 @@ Tensor<T, N> Tensor<T, N>::operator()(const Slice& sl) {
     return Tensor(data, des);
 }
 
-template <typename T, size_t N>
-const Tensor<T, N> Tensor<T, N>::operator()(const Slice& sl) const {
-    if (N != sl.ranges.size()) {
+template <typename T>
+const Tensor<T> Tensor<T>::operator()(const Slice& sl) const {
+    if (ndim() != sl.ranges.size()) {
         throw std::runtime_error("Dimensions Mismatch");
     }
 
     size_t st = 0, _sz = 1;
 
-    TL::internal::TensorDescriptor<N> des(desc);
-    for (size_t i = 0; i < N; ++i) {
+    TL::internal::TensorDescriptor des(desc);
+    for (size_t i = 0; i < ndim(); ++i) {
         size_t low = sl.ranges[i].low, high = sl.ranges[i].high;
         if (low >= high) {
             throw std::runtime_error("`low` range should be lesser than the `high` range");
@@ -109,33 +109,33 @@ const Tensor<T, N> Tensor<T, N>::operator()(const Slice& sl) const {
     return Tensor(data, des);
 }
 
-template <typename T, size_t N>
-Tensor<T, N-1> Tensor<T, N>::operator[](size_t idx) {
+template <typename T>
+Tensor<T> Tensor<T>::operator[](size_t idx) {
     if (idx >= desc.shape[0]) {
         throw std::out_of_range("Index out of range");
     }
 
-    std::array<size_t, N-1> sh;
+    std::vector<size_t> sh (ndim() - 1);
     std::copy(desc.shape.begin() + 1, desc.shape.end(), sh.begin());
-    TL::internal::TensorDescriptor<N-1> tdesc(sh, desc.stride[0] * idx);
-    return Tensor<T, N-1>(data, tdesc);
+    TL::internal::TensorDescriptor tdesc(sh, desc.stride[0] * idx);
+    return Tensor(data, tdesc);
 }
 
-template <typename T, size_t N>
-const Tensor<T, N-1> Tensor<T, N>::operator[](size_t idx) const {
+template <typename T>
+const Tensor<T> Tensor<T>::operator[](size_t idx) const {
     if (idx >= desc.shape[0]) {
         throw std::out_of_range("Index out of range");
     }
 
-    std::array<size_t, N-1> sh;
+    std::vector<size_t> sh (ndim() - 1);
     std::copy(desc.shape.begin() + 1, desc.shape.end(), sh.begin());
-    TL::internal::TensorDescriptor<N-1> tdesc(sh, desc.stride[0] * idx);
-    return Tensor<T, N-1>(data, tdesc);
+    TL::internal::TensorDescriptor tdesc(sh, desc.stride[0] * idx);
+    return Tensor(data, tdesc);
 }
 
-template <typename T, size_t N>
+template <typename T>
 template <typename F>
-Tensor<T, N>& Tensor<T, N>::_apply(F func) {
+Tensor<T>& Tensor<T>::_apply(F func) {
     /* Room for optimization */
     for (auto& x : *data) {
         func(x);
@@ -143,9 +143,13 @@ Tensor<T, N>& Tensor<T, N>::_apply(F func) {
     return *this;
 }
 
-template <typename T, size_t N>
+template <typename T>
 template <typename F>
-Tensor<T, N>& Tensor<T, N>::_apply(const Tensor<T, N>& tensor, F func) {
+Tensor<T>& Tensor<T>::_apply(const Tensor<T>& tensor, F func) {
+    if (shape() != tensor.shape()) {
+        throw std::runtime_error("Dimensions Mismatch");
+    }
+
     auto i = begin();
     auto j = tensor.begin();
     for (; i != end(); ++i, ++j) {
@@ -154,97 +158,97 @@ Tensor<T, N>& Tensor<T, N>::_apply(const Tensor<T, N>& tensor, F func) {
     return *this;
 }
 
-template <typename T, size_t N>
-Tensor<T, N>& Tensor<T, N>::operator=(const T& val) {
+template <typename T>
+Tensor<T>& Tensor<T>::operator=(const T& val) {
     return _apply([&] (T& elem) {elem = val;});
 }
 
 /* ------------ Scalar Operations ----------- */
 
-template <typename T, size_t N>
-Tensor<T, N>& Tensor<T, N>::operator+=(const T& val) {
+template <typename T>
+Tensor<T>& Tensor<T>::operator+=(const T& val) {
     return _apply([&] (T& elem) {elem += val;});
 }
 
-template <typename T, size_t N>
-Tensor<T, N>& Tensor<T, N>::operator-=(const T& val) {
+template <typename T>
+Tensor<T>& Tensor<T>::operator-=(const T& val) {
     return _apply([&] (T& elem) {elem -= val;});
 }
 
-template <typename T, size_t N>
-Tensor<T, N>& Tensor<T, N>::operator*=(const T& val) {
+template <typename T>
+Tensor<T>& Tensor<T>::operator*=(const T& val) {
     return _apply([&] (T& elem) {elem *= val;});
 }
 
-template <typename T, size_t N>
-Tensor<T, N>& Tensor<T, N>::operator/=(const T& val) {
+template <typename T>
+Tensor<T>& Tensor<T>::operator/=(const T& val) {
     return _apply([&] (T& elem) {elem /= val;});
 }
 
-template <typename T, size_t N>
-Tensor<T, N>& Tensor<T, N>::operator%=(const T& val) {
+template <typename T>
+Tensor<T>& Tensor<T>::operator%=(const T& val) {
     return _apply([&] (T& elem) {elem %= val;});
 }
 
 /* ----------- Tensor Operations -------------- */
 
-template <typename T, size_t N>
-Tensor<T, N>& Tensor<T, N>::operator+=(const Tensor<T, N>& tensor) {
+template <typename T>
+Tensor<T>& Tensor<T>::operator+=(const Tensor<T>& tensor) {
     return _apply(tensor, [] (T& t1, const T& t2) { t1 += t2; });
 }
 
-template <typename T, size_t N>
-Tensor<T, N>& Tensor<T, N>::operator-=(const Tensor<T, N>& tensor) {
+template <typename T>
+Tensor<T>& Tensor<T>::operator-=(const Tensor<T>& tensor) {
     return _apply(tensor, [] (T& t1, const T& t2) { t1 -= t2; });
 }
 
-template <typename T, size_t N>
-Tensor<T, N>& Tensor<T, N>::operator*=(const Tensor<T, N>& tensor) {
+template <typename T>
+Tensor<T>& Tensor<T>::operator*=(const Tensor<T>& tensor) {
     return _apply(tensor, [] (T& t1, const T& t2) { t1 *= t2; });
 }
 
-template <typename T, size_t N>
-Tensor<T, N>& Tensor<T, N>::operator/=(const Tensor<T, N>& tensor) {
+template <typename T>
+Tensor<T>& Tensor<T>::operator/=(const Tensor<T>& tensor) {
     return _apply(tensor, [] (T& t1, const T& t2) { t1 /= t2; });
 }
 
-template <typename T, size_t N>
-Tensor<T, N>& Tensor<T, N>::operator%=(const Tensor<T, N>& tensor) {
+template <typename T>
+Tensor<T>& Tensor<T>::operator%=(const Tensor<T>& tensor) {
     return _apply(tensor, [] (T& t1, const T& t2) { t1 %= t2; });
 }
 
 /* -------- Binary Operations with a scalar ------------- */
 
-template <typename T, size_t N>
-Tensor<T, N> Tensor<T, N>::operator+(const T& val) {
+template <typename T>
+Tensor<T> Tensor<T>::operator+(const T& val) {
     auto lhs = this->copy();
     lhs += val;
     return lhs;
 }
 
-template <typename T, size_t N>
-Tensor<T, N> Tensor<T, N>::operator-(const T& val) {
+template <typename T>
+Tensor<T> Tensor<T>::operator-(const T& val) {
     auto lhs = this->copy();
     lhs -= val;
     return lhs;
 }
 
-template <typename T, size_t N>
-Tensor<T, N> Tensor<T, N>::operator*(const T& val) {
+template <typename T>
+Tensor<T> Tensor<T>::operator*(const T& val) {
     auto lhs = this->copy();
     lhs *= val;
     return lhs;
 }
 
-template <typename T, size_t N>
-Tensor<T, N> Tensor<T, N>::operator/(const T& val) {
+template <typename T>
+Tensor<T> Tensor<T>::operator/(const T& val) {
     auto lhs = this->copy();
     lhs /= val;
     return lhs;
 }
 
-template <typename T, size_t N>
-Tensor<T, N> Tensor<T, N>::operator%(const T& val) {
+template <typename T>
+Tensor<T> Tensor<T>::operator%(const T& val) {
     auto lhs = this->copy();
     lhs %= val;
     return lhs;
@@ -252,53 +256,53 @@ Tensor<T, N> Tensor<T, N>::operator%(const T& val) {
 
 /* ------- Binary Operations with a tensor --------------- */
 
-template <typename T, size_t N>
-Tensor<T, N> Tensor<T, N>::operator+(const Tensor<T, N>& tensor) {
+template <typename T>
+Tensor<T> Tensor<T>::operator+(const Tensor<T>& tensor) {
     auto lhs = this->copy();
     lhs += tensor;
     return lhs;
 }
 
-template <typename T, size_t N>
-Tensor<T, N> Tensor<T, N>::operator-(const Tensor<T, N>& tensor) {
+template <typename T>
+Tensor<T> Tensor<T>::operator-(const Tensor<T>& tensor) {
     auto lhs = this->copy();
     lhs -= tensor;
     return lhs;
 }
 
-template <typename T, size_t N>
-Tensor<T, N> Tensor<T, N>::operator*(const Tensor<T, N>& tensor) {
+template <typename T>
+Tensor<T> Tensor<T>::operator*(const Tensor<T>& tensor) {
     auto lhs = this->copy();
     lhs *= tensor;
     return lhs;
 }
 
-template <typename T, size_t N>
-Tensor<T, N> Tensor<T, N>::operator/(const Tensor<T, N>& tensor) {
+template <typename T>
+Tensor<T> Tensor<T>::operator/(const Tensor<T>& tensor) {
     auto lhs = this->copy();
     lhs /= tensor;
     return lhs;
 }
 
-template <typename T, size_t N>
-Tensor<T, N> Tensor<T, N>::operator%(const Tensor<T, N>& tensor) {
+template <typename T>
+Tensor<T> Tensor<T>::operator%(const Tensor<T>& tensor) {
     auto lhs = this->copy();
     lhs %= tensor;
     return lhs;
 }
 
 /* --------- Printing / Formatting tensor ------------ */
-template <typename T, size_t N>
-void Tensor<T, N>::print(std::ostream& out) const {
-    TL::internal::TensorPrint<T, N> pr (out, *this);
+template <typename T>
+void Tensor<T>::print(std::ostream& out) const {
+    TL::internal::TensorPrint<T> pr (out, *this);
     pr.print();
 }
 
-template <typename T, size_t N>
-std::ostream& operator<<(std::ostream& out, const Tensor<T, N>& tensor) {
+template <typename T>
+std::ostream& operator<<(std::ostream& out, const Tensor<T>& tensor) {
     if (tensor.empty()) {
-        out << std::string(N, '[')
-            << std::string(N, ']')
+        out << std::string(tensor.ndim(), '[')
+            << std::string(tensor.ndim(), ']')
             << '\n';
         return out;
     }

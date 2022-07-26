@@ -12,7 +12,7 @@ TODOs
 - [ ] matmul(), transpose()
 - [ ] Tensor.reverse() 
 - [ ] Braced initiazation list
-- [ ] Runtime tensors
+- [x] Runtime tensors
 - [ ] CMake file for setting up the library in some machine
 - [ ] Tensor specialization for Matrix
 - [ ] squeeze(), expand_dims()

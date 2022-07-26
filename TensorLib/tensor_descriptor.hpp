@@ -1,14 +1,14 @@
 #ifndef TENSORLIB_TENSOR_DESCRIPTOR_HEADER
 #define TENSORLIB_TENSOR_DESCRIPTOR_HEADER
 
-#include <array>
+#include <vector>
 
 #include "utils.cpp"
 
 namespace TL {
 
-template <typename T, size_t N> class Tensor;
-template <typename T, size_t N> class TensorIterator;
+template <typename T> class TensorIterator;
+template <typename T> class Tensor;
 
 namespace internal {
 
@@ -16,24 +16,23 @@ namespace internal {
  * A TensorDescriptor class that holds the stride and shape information for a 
  * tensor of dimension @a N.
  */
-template <size_t N>
 class TensorDescriptor
 {
 public:
-    template <typename T, size_t M> friend class TL::Tensor;
-    template <typename T, size_t M> friend class TL::TensorIterator;
+    template <typename T> friend class TL::Tensor;
+    template <typename T> friend class TL::TensorIterator;
 
     /** 
-     * The default constructor. Sets the size of the Tensor to 0.
+     * The default constructor. Sets the size and dimension of the Tensor to 0.
      */
-    TensorDescriptor() : sz(0) {}
+    TensorDescriptor() : sz(0), n_dim(0) {}
 
     /** 
      * @brief Constructor that takes the total size and shape along each dimension.
-     * @param sz The total size of the tensor.
      * @param shape An array of size N. The shape of the tensor along each dimension.
+     * @param start (Optional) The offset for subtensors.
      */
-    TensorDescriptor(const std::array<size_t, N>&, size_t = 0);
+    TensorDescriptor(const std::vector<size_t>&, size_t = 0);
 
     /** 
      * @brief Constructor that takes only shape information.
@@ -41,6 +40,8 @@ public:
      */
     template<typename... Dims>
     TensorDescriptor(Dims...);
+
+    TensorDescriptor(const TensorDescriptor&) = default;
 
     /**
      * @brief Function to return the corresponding index in flat vector given the
@@ -58,13 +59,16 @@ public:
     /**
      * Total number of elements in the tensor.
      */
-    constexpr size_t size() const { return sz; }
+    size_t size() const { return sz; }
+
+    size_t ndim() const { return n_dim; }
 
 private:
     size_t sz;
+    size_t n_dim;
     size_t start = 0;
-    std::array<size_t, N> shape;
-    std::array<size_t, N> stride;
+    std::vector<size_t> shape;
+    std::vector<size_t> stride;
     
     /**
      * @brief A utility function that calculates and updates the stride info

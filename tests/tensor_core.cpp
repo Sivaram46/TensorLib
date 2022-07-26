@@ -12,23 +12,33 @@ void test_constructs()
 {
     // Constructs by std::vector
     vector<int> vec = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
-    TL::Tensor<int, 2> A (vec, {3, 4});  // A of shape (3, 4)
+    TL::Tensor<int> A (vec, {3, 4});  // A of shape (3, 4)
+    assert(A(0, 0) == vec[0]);
 
     // Constructs empty tensor of given shape
-    TL::Tensor<double, 2> B (2, 3);     // B of shape (2, 3)
+    TL::Tensor<double> B (2, 3);     // B of shape (2, 3)
     B = 4.0;
+    assert(B(1, 2) == 4.0);
 
     // Constructs by TL::Range
-    TL::Tensor<int, 3> C (R(24), {2, 3, 4});
+    TL::Tensor<int> C (R(24), {2, 3, 4});
+    assert(C(0, 1, 2) == 6);
 
     // Copy constructor - makes a reference
-    TL::Tensor<int, 2> copy (A);
-    copy(0, 1) = 100;
+    TL::Tensor<int> A_ref (A);
+    A_ref(0, 1) = 100;
+    assert(A(0, 1) == A_ref(0, 1));
+    
+    // Tensor::copy() makes a copy to the tensor. Changing an element doesn't 
+    // reflect in its copy.
+    auto A_copy = A.copy();
+    A_copy(0, 1) = 50;
+    assert(A(0, 1) != A_copy(0, 1));
 }
 
 void test_arithmetic_op()
 {
-    TL::Tensor<int, 2> A(R(6), {2, 3}), B(2, 3);
+    TL::Tensor<int> A(R(6), {2, 3}), B(2, 3);
     B = 3;
     auto C = (A / B) + (A * 2);
     C -= 4;
@@ -36,7 +46,7 @@ void test_arithmetic_op()
 
 void test_slice()
 {
-    TL::Tensor<int, 3> A(R(60), {3, 4, 5});
+    TL::Tensor<int> A(R(60), {3, 4, 5});
     auto A1 = A(Slice(R(1, 3), R(3), 2)); // [1:3, :3, 2]
     auto A2 = A1(Slice(R(2), 0, 0));
 
@@ -47,7 +57,7 @@ void test_slice()
 void test_iterator()
 {
     // Arithmetic and deref operations of iterator
-    TL::Tensor<int, 3> A(R(60), {3, 4, 5});
+    TL::Tensor<int> A(R(60), {3, 4, 5});
     auto it = A.begin();
     assert(*it == 0);
 
@@ -85,8 +95,8 @@ void test_iterator()
 
 void test_const_iterator()
 {
-    TL::Tensor<int, 2> A (R(8), {2, 4});
-    const TL::Tensor<int, 2> B (R(8), {2, 4});
+    TL::Tensor<int> A (R(8), {2, 4});
+    const TL::Tensor<int> B (R(8), {2, 4});
     auto cit = A.cbegin();
     cit++;
     assert(*cit == 1);
@@ -98,13 +108,13 @@ void test_const_iterator()
 
 void test_print()
 {
-    TL::Tensor<int, 3> A(R(60), {3, 4, 5});
+    TL::Tensor<int> A(R(60), {3, 4, 5});
     A(0, 0, 0) = 100;
     cout    << "A = \n"
             << A
             << "\n";
     
-    TL::Tensor<double, 3> B(1, 3, 1);
+    TL::Tensor<double> B(1, 3, 1);
     B = 3.1415926;
     auto default_format = B.format;
     B.format.precision = 4;
@@ -114,7 +124,7 @@ void test_print()
         
     // Printing empty tensor
     cout    << "Empty Tensor: "
-            << TL::Tensor<int, 4>()
+            << TL::Tensor<int>()
             << "\n";
 
     B.format = default_format;

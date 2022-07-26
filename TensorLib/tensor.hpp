@@ -18,7 +18,7 @@ namespace TL {
 /**
  * A compile time tensor of type @a T and dimension @a N
  */
-template <typename T, size_t N>
+template <typename T>
 class Tensor 
 {
 public:
@@ -29,16 +29,13 @@ public:
     using const_iterator = TensorIterator<true>;
     using value_type = T;
 
-    static const size_t n_dim = N;
+    size_t ndim() const { return desc.ndim(); }
+    size_t size() const { return desc.size(); }
 
-    constexpr size_t ndim() const { return n_dim; }
-    constexpr size_t size() const { return desc.size(); }
+    const std::vector<size_t>& shape() const { return desc.shape; }
+    bool empty() const { return !size(); }
 
-    size_t shape(size_t dim) const { return desc.shape[dim]; }
-    const std::array<size_t, N>& shape() const { return desc.shape; }
-    constexpr bool empty() const { return !size(); }
-
-    const std::array<size_t, N>& strides() const { return desc.stride; }
+    const std::vector<size_t>& strides() const { return desc.stride; }
 
     /* ---------- Iterators over the Tensor ---------- */
 
@@ -60,7 +57,7 @@ public:
     /* The default constructor */
     Tensor() : data(new std::vector<T>()) {}
 
-    Tensor(std::shared_ptr<std::vector<T>> _data, const TL::internal::TensorDescriptor<N>& _desc)
+    Tensor(std::shared_ptr<std::vector<T>> _data, const TL::internal::TensorDescriptor& _desc)
     : data(_data), desc(_desc) {}
 
     /**
@@ -83,16 +80,16 @@ public:
      * @param vec The vector from which the data will be copied.
      * @param _shape Shape of the tensor to build. Shape and #of elements in vector should match. 
      */
-    Tensor(const std::vector<T>& vec, const std::array<size_t, N>& _shape)
+    Tensor(const std::vector<T>& vec, const std::vector<size_t>& _shape)
     : data(new std::vector<T>(vec)), desc(_shape) {}
 
     /**
      * @brief Move version of the above constructor.
      */
-    Tensor(std::vector<T>&& vec, const std::array<size_t, N>& _shape)
+    Tensor(std::vector<T>&& vec, const std::vector<size_t>& _shape)
     : data(new std::vector<T>(vec)), desc(_shape) {}
 
-    Tensor(TL::Range, const std::array<size_t, N>&);
+    Tensor(TL::Range, const std::vector<size_t>&);
 
     /**
      * @brief Default copy constructor that just take a reference from the given Tensor object. 
@@ -150,12 +147,12 @@ public:
      * @param idx The index to be chosen.
      * @throw std::out_of_range when index goes out of range.
      */
-    Tensor<T, N-1> operator[](size_t);
+    Tensor operator[](size_t);
 
     /** 
      * @brief Constant version of subscript indexing. 
      */
-    const Tensor<T, N-1> operator[](size_t) const;
+    const Tensor operator[](size_t) const;
 
     /**
      * @brief An utility function that applies @a F to every element in the tensor.
@@ -214,15 +211,13 @@ public:
 
     void print(std::ostream&) const;
     
-    template <typename U, size_t M>
-    friend std::ostream& operator<<(std::ostream&, const Tensor<U, M>&);
-
-    // friend class TensorIterator<T, N>;
+    template <typename U>
+    friend std::ostream& operator<<(std::ostream&, const Tensor<U>&);
     
     TensorFormatter format;
     
 private:
-    TL::internal::TensorDescriptor<N> desc;
+    TL::internal::TensorDescriptor desc;
     std::shared_ptr<std::vector<T>> data;
 };
 

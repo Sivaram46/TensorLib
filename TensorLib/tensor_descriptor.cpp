@@ -3,7 +3,7 @@
 
 #include <numeric>
 #include <algorithm>
-#include <array>
+#include <vector>
 #include <exception>
 
 #include "tensor_descriptor.hpp"
@@ -12,8 +12,7 @@ namespace TL {
 
 namespace internal {
 
-template <size_t N>
-void TensorDescriptor<N>::_calculate_stride() {
+void TensorDescriptor::_calculate_stride() {
     /* Logic:
         The strides of a N-dimensional tensor of shape (s_0, s_1, ..., s_n-1) and
         strides (t_0, t_1, ..., t_n-2, t_n-1) have the value of 
@@ -25,32 +24,27 @@ void TensorDescriptor<N>::_calculate_stride() {
         .
         t_n-i = t_n-i-1 * s_n-i-1
     */
-    stride[N - 1] = 1;
-    for (long i = N-2; i >= 0; --i) {
+    stride[ndim() - 1] = 1;
+    for (long i = ndim()-2; i >= 0; --i) {
         stride[i] = stride[i+1] * shape[i+1]; 
     }
 }
 
-template <size_t N>
-TensorDescriptor<N>::TensorDescriptor(
-    const std::array<size_t, N>& _shape, size_t _st
+TensorDescriptor::TensorDescriptor(
+    const std::vector<size_t>& _shape, size_t _st
 ) 
-: shape(_shape), start(_st) {
+: shape(_shape), stride(_shape.size(), 1), start(_st), n_dim(_shape.size()) {
     sz = std::accumulate(
         shape.begin(), shape.end(), static_cast<size_t> (1), 
         [] (size_t a, size_t b) {return a * b;}
     );
+    stride.reserve(ndim());
     _calculate_stride();
 }
 
-template <size_t N>
 template <typename... Dims>
-TensorDescriptor<N>::TensorDescriptor(Dims... dims) {
-    static_assert(sizeof...(dims) == N, "Dimensions Mismatch");
-
-    std::array<size_t, N> _shape { size_t(dims)... };
-
-    std::copy(_shape.begin(), _shape.end(), shape.begin());
+TensorDescriptor::TensorDescriptor(Dims... dims)
+: shape({ size_t(dims)... }), stride(sizeof...(dims)), n_dim(sizeof...(dims)) {
     _calculate_stride();
 
     sz = std::accumulate(
@@ -59,11 +53,10 @@ TensorDescriptor<N>::TensorDescriptor(Dims... dims) {
     );   
 }
 
-template <size_t N>
 template <typename... Dims>
-bool TensorDescriptor<N>::_check_bound(Dims... dims) const {
-    std::array<size_t, N> idx { size_t(dims)... };
-    for (size_t i = 0; i < N; ++i) {
+bool TensorDescriptor::_check_bound(Dims... dims) const {
+    std::vector<size_t> idx { size_t(dims)... };
+    for (size_t i = 0; i < ndim(); ++i) {
         if (idx[i] >= shape[i]) {
             return false;
         }
@@ -71,17 +64,19 @@ bool TensorDescriptor<N>::_check_bound(Dims... dims) const {
     return true;
 }
 
-template <size_t N>
 template <typename... Dims>
 std::enable_if_t<
     TL::Element_valid<Dims...>(),
-size_t> TensorDescriptor<N>::operator()(Dims... dims) const {
-    static_assert(sizeof...(dims) == N, "");
+size_t> TensorDescriptor::operator()(Dims... dims) const {
+    if (sizeof...(dims) != ndim()) {
+        throw std::runtime_error("Dimensions Mismatch");
+    }
+
     if (!_check_bound(dims...)) {
         throw std::out_of_range("Index out of range");
     }
 
-    std::array<size_t, N> indices { size_t(dims)... };
+    std::vector<size_t> indices { size_t(dims)... };
     return start + std::inner_product(
         indices.begin(), indices.end(), stride.begin(), size_t(0)
     );

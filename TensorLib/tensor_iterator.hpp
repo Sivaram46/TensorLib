@@ -8,7 +8,6 @@
 namespace TL {
 
 namespace internal {
-    template <size_t N>
     class TensorDescriptor;
 }
 
@@ -17,9 +16,9 @@ namespace internal {
  * one. Provides all necessary operators to work this as a iterator and throws
  * appropriate exceptions whenever the iterator goes out of bound.
  */
-template <typename T, size_t N>
+template <typename T>
 template <bool Const>
-class Tensor<T, N>::TensorIterator 
+class Tensor<T>::TensorIterator 
 {
 public:
     /**
@@ -32,7 +31,7 @@ public:
      * @param tensor The tensor to which the iterator would be bounded.
      * @param _off The offset that would be used to set for initial offset.
      */
-    TensorIterator(const Tensor<T, N>& tensor, size_t _off = 0) 
+    TensorIterator(const Tensor<T>& tensor, size_t _off = 0) 
     : data(tensor.data), desc(tensor.desc), offset(_off) {}
 
     /**
@@ -74,7 +73,7 @@ public:
 
 private:
     std::weak_ptr<std::vector<T>> data;
-    TL::internal::TensorDescriptor<N> desc;
+    TL::internal::TensorDescriptor desc;
     size_t offset;
 
     /**
