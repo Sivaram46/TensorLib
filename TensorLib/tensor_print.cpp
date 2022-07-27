@@ -51,7 +51,7 @@ void TensorPrint<T>::basic_print(std::stringstream& element) const {
     std::vector<size_t> stride(N, 1);
     /* Calculate temporary stride for the tensor */
     for (long i = N - 2; i >= 0; --i) {
-        stride[i] = stride[i + 1] * tensor.shape()[i];
+        stride[i] = stride[i + 1] * tensor.shape()[i + 1];
     }
 
     auto format = tensor.format;
@@ -90,12 +90,9 @@ void TensorPrint<T>::basic_print(std::stringstream& element) const {
 
         // Special cases for first and last elements
         if (i == 0) {
-            out << std::string(N, '[')
-                << element.str()
-                << format.sep;
-            continue;
+            out << std::string(N, '[');
         }
-        if (i == size - 1) {
+        else if (i == size - 1) {
             out << element.str()
                 << std::string(N, ']')
                 << '\n';

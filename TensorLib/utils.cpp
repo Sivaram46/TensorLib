@@ -1,6 +1,8 @@
 #ifndef TENSORLIB_TENSOR_UTILS
 #define TENSORLIB_TENSOR_UTILS
 
+#include <iostream>
+#include <vector>
 #include <type_traits>
 
 namespace TL {
@@ -55,6 +57,20 @@ constexpr bool Element_valid() {
 
 template <bool B, typename T>
 using Enable_if = typename std::enable_if<B, T>::type;
+
+// Printing vectors of type size_t
+template <typename T>
+std::ostream& operator<<(std::ostream& out, const std::vector<T>& vec) {
+    if (vec.empty()) {
+        return out << "[]";
+    }
+
+    out << "[";
+    for (auto& i : vec) {
+        out << i << ", ";
+    }
+    return out << "\b\b]";
+}
 
 }   // namespace TL
 

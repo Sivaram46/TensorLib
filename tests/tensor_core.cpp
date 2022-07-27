@@ -8,6 +8,8 @@ using namespace std;
 
 using R = TL::Range;
 using Slice = TL::Slice;
+using TL::operator<<;
+
 void test_constructs()
 {
     // Constructs by std::vector
@@ -111,16 +113,16 @@ void test_print()
     TL::Tensor<int> A(R(60), {3, 4, 5});
     A(0, 0, 0) = 100;
     cout    << "A = \n"
-            << A
-            << "\n";
+            << A;
+    cout << "Shape: " << A.shape() << "\n\n";
     
     TL::Tensor<double> B(1, 3, 1);
     B = 3.1415926;
     auto default_format = B.format;
     B.format.precision = 4;
     cout    << "B = \n"
-            << B
-            << "\n";
+            << B;
+    cout << "Shape: " << B.shape() << "\n\n";
         
     // Printing empty tensor
     cout    << "Empty Tensor: "
@@ -132,6 +134,20 @@ void test_print()
     cout    << "Scientific float format\n"
             << B
             << "\n";
+
+    // Printing matrix
+    TL::Tensor<int> M (2, 3);
+    M = 5;
+    cout    << "M = \n"
+            << M;
+    cout << "Shape: " << M.shape() << "\n\n";
+
+    // Printing vector
+    TL::Tensor<double> V (5);
+    V = 2.8182;
+    cout    << "V = \n"
+            << V;
+    cout << "Shape: " << V.shape() << "\n\n";
 }
 
 int main()
