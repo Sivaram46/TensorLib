@@ -34,6 +34,7 @@ TensorDescriptor::TensorDescriptor(
     const std::vector<size_t>& _shape, size_t _st
 ) 
 : shape(_shape), stride(_shape.size(), 1), start(_st), n_dim(_shape.size()) {
+    /* size can be calculated from multiplying all the shapes. */
     sz = std::accumulate(
         shape.begin(), shape.end(), static_cast<size_t> (1), 
         [] (size_t a, size_t b) {return a * b;}
@@ -77,6 +78,8 @@ size_t> TensorDescriptor::operator()(Dims... dims) const {
     }
 
     std::vector<size_t> indices { size_t(dims)... };
+    /* Index in the flat vector is just inner product of strides and given indices
+    plus the start. */
     return start + std::inner_product(
         indices.begin(), indices.end(), stride.begin(), size_t(0)
     );

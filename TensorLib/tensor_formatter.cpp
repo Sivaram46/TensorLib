@@ -7,14 +7,27 @@ namespace TL {
 
 struct TensorFormatter
 {
+    /* Floating point precision. -1 for default value. */
     int precision;
+    /* Max elements to be print. -1 for printing all elements. */
     int max_elements;
+    /* Maximum linewidth to be print. -1 for no restriction on linewidth. */
     int linewidth;  
+    /* Whether to print sign character or not. */
     bool sign;
+    /* seperator for successive elements in tensor. Default to ", " */
     std::string sep;
 
+    /**
+     * @brief Float printing modes.
+     * @a Scientific - Prints floats in scientific format
+     * @a Fixed - Prints floats in fixed format
+     * @a Default - Default float print mode.
+     */
     enum class FloatMode { 
-        Scientific, Fixed, Default
+        Scientific, 
+        Fixed, 
+        Default
     } float_mode;
 
     TensorFormatter(

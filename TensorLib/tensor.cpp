@@ -6,10 +6,10 @@
 namespace TL {
 
 template <typename T>
-Tensor<T>::Tensor(Range r, const std::vector<size_t>& _shape) 
+Tensor<T>::Tensor(Range _range, const std::vector<size_t>& _shape) 
 : desc(_shape) {
     std::vector<T> tmp(desc.size());
-    for (int i = r.low; i < r.high; ++i) {
+    for (size_t i = _range.low; i < _range.high; ++i) {
         tmp[i] = i;
     }
 

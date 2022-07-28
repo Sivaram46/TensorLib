@@ -11,20 +11,41 @@ namespace TL {
     
 namespace internal {
 
+/**
+ * @brief A utility class to print the tensor.
+ */
 template <typename T>
 class TensorPrint
 {
 public:
+    /**
+     * @brief Constructs a TensorPrint from a reference of ostream and 
+     * tensor objects.
+     * @param _out The ostream object to which the tensor to be written.
+     * @param _tensor The tensor to be written.
+     */
     TensorPrint(std::ostream& _out, const Tensor<T>& _tensor)
     : out(_out), tensor(_tensor) {}
 
+    /**
+     * @brief Prints by writing the tensor to the @a out.
+     */
     void print() const;
 
 private:
     std::ostream& out;
     const Tensor<T>& tensor;
 
+    /**
+     * @brief Returns the maximum number of character width to be needed to 
+     * print any element in the tensor. 
+     */
     size_t calculate_width() const;
+
+    /**
+     * @brief Prints by writing the tensor to the @a out.
+     * @param out The stream to which the tensor to be written.
+     */
     void basic_print(std::stringstream&) const;
 };
 
