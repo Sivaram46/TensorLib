@@ -150,6 +150,35 @@ void test_print()
     cout << "Shape: " << V.shape() << "\n\n";
 }
 
+void test_reshape_squeeze()
+{
+    // reshape
+    TL::Tensor<int> A (R(24), {2, 3, 4});
+    auto B = A.reshape(4, 6);
+    assert(B.shape() == vector<size_t>({4, 6}));
+    assert(B.ndim() == 2);
+
+    // squeeze
+    B = A.reshape(1, 1, 24);
+    auto C = B.squeeze();
+    assert(C.shape() == vector<size_t>({24}));
+    assert(C.ndim() == 1);
+
+    C = B.squeeze(0);
+    assert(C.shape() == vector<size_t>({1, 24}));
+    assert(C.ndim() == 2);
+
+    // expand_dim
+    auto D = A.expand_dims(1);
+    assert(D.shape() == vector<size_t>({2, 1, 3, 4}));
+    assert(D.ndim() == A.ndim() + 1);
+
+    // ravel
+    auto E = A.ravel();
+    assert(E.shape() == std::vector<size_t>({A.size()}));
+    assert(E.ndim() == 1);
+}
+
 int main()
 {   
     test_constructs();
@@ -158,4 +187,5 @@ int main()
     test_iterator();
     test_const_iterator();
     test_print();
+    test_reshape_squeeze();   
 }

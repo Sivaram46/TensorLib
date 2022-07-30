@@ -47,7 +47,7 @@ public:
      * @brief Returns the shape of the Tensor.
      * @return std::vector<size_t> of size Tensor::ndim()
      */
-    const std::vector<size_t>& shape() const { return desc.shape; }
+    std::vector<size_t> shape() const { return desc.shape; }
 
     /** 
      * @brief Returns whether the Tensor is empty or not.
@@ -63,7 +63,7 @@ public:
      * 
      * @return std::vector<size_t> of size Tensor::ndim()
      */
-    const std::vector<size_t>& strides() const { return desc.stride; }
+    std::vector<size_t> strides() const { return desc.stride; }
 
     /* ---------- Iterators over the Tensor ---------- */
 
@@ -139,14 +139,22 @@ public:
      * @param _vec The vector from which the data will be copied.
      * @param _shape Shape of the tensor to build.  
      */
-    Tensor(const std::vector<T>& _vec, const std::vector<size_t>& _shape)
-    : data(new std::vector<T>(_vec)), desc(_shape) {}
+    Tensor(const std::vector<T>& _vec, const std::vector<size_t>& _shape, size_t _st = 0)
+    : data(new std::vector<T>(_vec)), desc(_shape, _st) {
+        if (size() != _vec.size()) {
+            throw std::runtime_error("Number of elements and shapes mismatch");
+        }
+    }
 
     /**
-     * @brief Move version of the constructor that takes vector and shape. 
+     * @brief Move version of the consTensortructor that takes vector and shape. 
      */
-    Tensor(std::vector<T>&& vec, const std::vector<size_t>& _shape)
-    : data(new std::vector<T>(vec)), desc(_shape) {}
+    Tensor(std::vector<T>&& _vec, const std::vector<size_t>& _shape, size_t _st = 0)
+    : data(new std::vector<T>(_vec)), desc(_shape, _st) {
+        if (size() != _vec.size()) {
+            throw std::runtime_error("Number of elements and shapes mismatch");
+        }
+    }
 
     /**
      * @brief Constructs a tensor with evenly spaced elements withing the given
@@ -173,7 +181,7 @@ public:
     /**
      * @brief Returns a copy of the tensor.
      */
-    Tensor copy();
+    Tensor copy() const;
 
     ~Tensor() = default;
 
@@ -277,6 +285,19 @@ public:
     Tensor operator*(const Tensor&);
     Tensor operator/(const Tensor&);
     Tensor operator%(const Tensor&);
+
+    /* ------- Manipulating dimensions ------- */
+
+    template <typename... Dims>
+    std::enable_if_t<
+        All(Is_convertible<Dims, size_t>()...),
+    Tensor> reshape(Dims... dims) const;
+
+    Tensor squeeze(long = -1) const;
+
+    Tensor expand_dims(size_t) const;
+
+    Tensor ravel() const;
 
     /* --------- Printing / Formatting tensor ------------ */
 

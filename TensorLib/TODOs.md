@@ -2,21 +2,28 @@ TODOs
 - [x] Tensor slice
 - [x] Iterator over the tensor
 - [ ] Printing tensors
-    - Integers
-    - Fixed, scientific and precision for double
-    - Linewidths
-    - Print only summary
+    - [x] Integers
+    - [x] Fixed, scientific and precision for double
+    - [ ] Linewidths
+    - [ ] Print only summary
 - [x] operator[]
-- [ ] 0 dimensional tensor
-- [ ] Tensor.reshape(), ravel()
-- [ ] matmul(), transpose()
-- [ ] Tensor.reverse() 
-- [ ] Braced initiazation list
 - [x] Runtime tensors
-- [ ] CMake file for setting up the library in some machine
+- [x] Tensor.reshape(), ravel() 
+- [x] squeeze(), expand_dims()
+- [ ] Braced initiazation list
+- [ ] Compile-time tensors
+- [ ] 0 dimensional tensor
+- [ ] Tensor.reverse() 
+- [ ] Tensor broadcasting
+- [ ] CMake file for setting up the library
+- [ ] Tests
 - [ ] Tensor specialization for Matrix
-- [ ] squeeze(), expand_dims()
+- [ ] matmul(), transpose()
 - [ ] Binary operations on type different tensors
 
 Bugs:
 - [ ] operator[] for N <= 1
+
+Improvement:
+- [ ] Clearup unused memory when copying a tensor and the parent tensor went out of scope
+- [ ] Vector processing

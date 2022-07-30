@@ -17,8 +17,8 @@ Tensor<T>::Tensor(Range _range, const std::vector<size_t>& _shape)
 }
 
 template <typename T>
-Tensor<T> Tensor<T>::copy() {
-    return Tensor (*data, desc.shape);
+Tensor<T> Tensor<T>::copy() const {
+    return Tensor (*data, desc.shape, desc.start);
 }
 
 /* -------- Access operators ----------- */
@@ -291,7 +291,65 @@ Tensor<T> Tensor<T>::operator%(const Tensor<T>& tensor) {
     return lhs;
 }
 
+/* ------- Manipulating dimensions ------- */
+template <typename T>
+template <typename... Dims>
+std::enable_if_t<
+    All(Is_convertible<Dims, size_t>()...),
+Tensor<T>> Tensor<T>::reshape(Dims... dims) const {
+    std::vector<size_t> _shape { size_t(dims)... };
+    return Tensor(*data, _shape, desc.start);
+}
+
+template <typename T>
+Tensor<T> Tensor<T>::squeeze(long axis) const {
+    Tensor temp = copy();
+    // Squeeze out all possible dimensions
+    if (axis == -1) {
+        std::vector<size_t> _shape;
+        for (auto& elem : desc.shape) {
+            if (elem != 1) {
+                _shape.push_back(elem);
+            }
+        }
+
+        return Tensor(*data, _shape, desc.start);
+    }
+
+    else {
+        if (desc.shape[axis] != 1) {
+            throw std::runtime_error("Cannot squeeze out non zero shaped axis");
+        }
+
+        if (axis >= ndim() || axis < -1) {
+            throw std::out_of_range("Axis out of bound for squeeze");
+        }
+        
+        auto _shape = shape();
+        _shape.erase(_shape.begin() + axis);
+        return Tensor(*data, _shape, desc.start);
+    }
+}
+
+template <typename T>
+Tensor<T> Tensor<T>::expand_dims(size_t axis) const {
+    if (axis > ndim()) {
+        throw std::out_of_range("Axis out of bound for expand_dims");
+    }
+
+    auto _shape = shape();
+    _shape.insert(_shape.begin() + axis, 1);
+    return Tensor(*data, _shape, desc.start);
+}
+
+template <typename T>
+Tensor<T> Tensor<T>::ravel() const {
+    std::vector<size_t> _shape = {size()};
+    return Tensor(*data, _shape, desc.start);
+}
+
 /* --------- Printing / Formatting tensor ------------ */
+
 template <typename T>
 void Tensor<T>::print(std::ostream& out) const {
     TL::internal::TensorPrint<T> pr (out, *this);
