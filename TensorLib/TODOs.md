@@ -12,7 +12,7 @@ TODOs
 - [x] squeeze(), expand_dims()
 - [ ] Braced initiazation list
 - [ ] Compile-time tensors
-- [ ] 0 dimensional tensor
+- [x] 0 dimensional tensor
 - [ ] Tensor.reverse() 
 - [ ] Tensor broadcasting
 - [ ] CMake file for setting up the library
@@ -22,7 +22,7 @@ TODOs
 - [ ] Binary operations on type different tensors
 
 Bugs:
-- [ ] operator[] for N <= 1
+- [x] operator[] for N <= 1
 
 Improvement:
 - [ ] Clearup unused memory when copying a tensor and the parent tensor went out of scope

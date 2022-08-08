@@ -24,7 +24,7 @@ public:
     /** 
      * @brief The default constructor. Sets the size and dimension of the Tensor to 0.
      */
-    TensorDescriptor() : sz(0), n_dim(0) {}
+    TensorDescriptor() : sz(1), n_dim(0) {}
 
     /** 
      * @brief Constructs descriptor from shape along each dim and optional start offset.

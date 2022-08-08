@@ -18,7 +18,9 @@ Tensor<T>::Tensor(Range _range, const std::vector<size_t>& _shape)
 
 template <typename T>
 Tensor<T> Tensor<T>::copy() const {
-    return Tensor (*data, desc.shape, desc.start);
+    Tensor temp(*data, desc.shape, desc.start);
+    temp.format = format;
+    return temp;
 }
 
 /* -------- Access operators ----------- */
@@ -74,7 +76,7 @@ Tensor<T> Tensor<T>::operator()(const Slice& sl) {
 
     des.start += st;
     des.sz = _sz;
-    return Tensor(data, des);
+    return Tensor(data, des, format);
 }
 
 template <typename T>
@@ -106,7 +108,7 @@ const Tensor<T> Tensor<T>::operator()(const Slice& sl) const {
 
     des.start += st;
     des.sz = _sz;
-    return Tensor(data, des);
+    return Tensor(data, des, format);
 }
 
 template <typename T>
@@ -115,10 +117,14 @@ Tensor<T> Tensor<T>::operator[](size_t idx) {
         throw std::out_of_range("Index out of range");
     }
 
+    if (ndim() == 1) {
+        return Tensor((*data)[0]);
+    }
+
     std::vector<size_t> sh (ndim() - 1);
     std::copy(desc.shape.begin() + 1, desc.shape.end(), sh.begin());
     TL::internal::TensorDescriptor tdesc(sh, desc.stride[0] * idx);
-    return Tensor(data, tdesc);
+    return Tensor(data, tdesc, format);
 }
 
 template <typename T>
@@ -127,10 +133,14 @@ const Tensor<T> Tensor<T>::operator[](size_t idx) const {
         throw std::out_of_range("Index out of range");
     }
 
+    if (ndim() == 1) {
+        return Tensor((*data)[0]);
+    }
+
     std::vector<size_t> sh (ndim() - 1);
     std::copy(desc.shape.begin() + 1, desc.shape.end(), sh.begin());
     TL::internal::TensorDescriptor tdesc(sh, desc.stride[0] * idx);
-    return Tensor(data, tdesc);
+    return Tensor(data, tdesc, format);
 }
 
 template <typename T>
@@ -358,11 +368,8 @@ void Tensor<T>::print(std::ostream& out) const {
 
 template <typename T>
 std::ostream& operator<<(std::ostream& out, const Tensor<T>& tensor) {
-    if (tensor.empty()) {
-        out << std::string(tensor.ndim(), '[')
-            << std::string(tensor.ndim(), ']')
-            << '\n';
-        return out;
+    if (!tensor.ndim()) {
+        return out << (*tensor.data)[0] << "\n";
     }
 
     tensor.print(out);

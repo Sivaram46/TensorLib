@@ -106,9 +106,15 @@ public:
     /* ---------- Constructors ---------- */
 
     /**
-     * @brief The default constructor that initializes an empty tensor.
+     * @brief The vector shouldn't be empty.
      */
-    Tensor() : data(new std::vector<T>()) {}
+    Tensor() = delete;
+
+    /**
+     * Constructs a 0 dimensional tensor from an element of tensor type.
+     * @param _val The value which will be put in a 0D tensor.
+     */
+    Tensor(const T& _val) : data(new std::vector<T>(1, _val)) {}
 
     /**
      * @brief Constructs tensor from shared_ptr<vector<T>> and TensorDescriptor
@@ -117,20 +123,12 @@ public:
      * @param _desc @a TL::interal::TensorDescriptor that holds the information 
      * about the tensor like shape and strides.
      */
-    Tensor(std::shared_ptr<std::vector<T>> _data, const TL::internal::TensorDescriptor& _desc)
-    : data(_data), desc(_desc) {}
-
-    /**
-     * @brief Constructs tensor from shapes. The elements are default initialized.
-     * @param dims... should all be convertible to size_t.
-     */
-    template <typename... Dims,
-        typename = std::enable_if_t<All(Is_convertible<Dims, size_t>()...)>
-    >
-    Tensor(Dims... dims)
-    : desc(dims...) {
-        data = std::make_shared<std::vector<T>>(desc.size());
-    }
+    Tensor(
+        std::shared_ptr<std::vector<T>> _data,
+        const TL::internal::TensorDescriptor& _desc,
+        const TL::TensorFormatter& _format
+    )
+    : data(_data), desc(_desc), format(_format) {}
 
     /** 
      * @brief Constructs tensor from vector<T> and shapes. 
