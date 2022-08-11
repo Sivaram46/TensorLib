@@ -1,6 +1,8 @@
 #ifndef TENSORLIB_RANGE_CPP
 #define TENSORLIB_RANGE_CPP
 
+#include <cstddef>
+
 namespace TL {
 
 /**

@@ -9,6 +9,8 @@
 
 namespace TL {
     
+template <typename T> class Tensor;
+
 namespace internal {
 
 /**
@@ -62,7 +64,7 @@ size_t TensorPrint<T>::calculate_width() const {
         max_width = std::max(max_width, static_cast<size_t>(element.tellp()));
     }
     
-    max_width = std::min(max_width, static_cast<size_t> (tensor.format.precision));
+    max_width = std::min(max_width, static_cast<size_t>(tensor.format.precision));
     return max_width;
 }
 
