@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cassert>
 
-#include "../TensorLib/tensor_core"
+#include "TensorLib/tensor_core.hpp"
 
 using namespace std;
 

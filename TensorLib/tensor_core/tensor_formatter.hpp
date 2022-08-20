@@ -1,5 +1,5 @@
-#ifndef TENSORLIB_TENSOR_FORMATTER_CPP
-#define TENSORLIB_TENSOR_FORMATTER_CPP
+#ifndef TENSORLIB_TENSOR_FORMATTER_H_
+#define TENSORLIB_TENSOR_FORMATTER_H_
 
 #include <string>
 
@@ -40,4 +40,4 @@ struct TensorFormatter
 
 }   // namespace TL
 
-#endif
+#endif  // TENSORLIB_TENSOR_FORMATTER_H_

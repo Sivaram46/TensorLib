@@ -1,5 +1,5 @@
-#ifndef TENSORLIB_RANGE_CPP
-#define TENSORLIB_RANGE_CPP
+#ifndef TENSORLIB_RANGE_H_
+#define TENSORLIB_RANGE_H_
 
 #include <cstddef>
 
@@ -19,4 +19,4 @@ struct Range {
 
 }   // namespace TL
 
-#endif
+#endif  // TENSORLIB_RANGE_H_
