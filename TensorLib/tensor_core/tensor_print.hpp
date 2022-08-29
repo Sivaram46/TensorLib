@@ -1,15 +1,22 @@
-#ifndef TENSORLIB_TENSOR_PRINT_CPP
-#define TENSORLIB_TENSOR_PRINT_CPP
+#ifndef TENSORLIB_TENSOR_PRINT_H_
+#define TENSORLIB_TENSOR_PRINT_H_
+
+#include "tensor_formatter.hpp"
 
 #include <iostream>
 #include <vector>
 #include <sstream>
 
-#include "tensor_formatter.cpp"
-
 namespace TL {
     
+template <typename T>
+class Tensor;
+
 namespace internal {
+
+/**************************************************
+              TensorPrint declaration 
+ **************************************************/
 
 /**
  * @brief A utility class to print the tensor.
@@ -49,6 +56,20 @@ private:
     void basic_print(std::stringstream&) const;
 };
 
+}   // namespace internal
+
+}   // namespace TL
+
+/**************************************************
+                TensorPrint definition 
+ **************************************************/
+
+#include "tensor.hpp"
+
+namespace TL {
+
+namespace internal {
+
 template <typename T>
 size_t TensorPrint<T>::calculate_width() const {
 
@@ -62,7 +83,7 @@ size_t TensorPrint<T>::calculate_width() const {
         max_width = std::max(max_width, static_cast<size_t>(element.tellp()));
     }
     
-    max_width = std::min(max_width, static_cast<size_t> (tensor.format.precision));
+    max_width = std::min(max_width, static_cast<size_t>(tensor.format.precision));
     return max_width;
 }
 
@@ -75,7 +96,7 @@ void TensorPrint<T>::basic_print(std::stringstream& element) const {
         stride[i] = stride[i + 1] * tensor.shape()[i + 1];
     }
 
-    auto format = tensor.format;
+    TensorFormatter format = tensor.format;
     size_t size = tensor.size();
     auto width = calculate_width();
 
@@ -137,7 +158,7 @@ void TensorPrint<T>::basic_print(std::stringstream& element) const {
 template <typename T>
 void TensorPrint<T>::print() const {
     std::stringstream element;
-    auto format = tensor.format;
+    TensorFormatter format = tensor.format;
 
     // Set floating precision
     if (format.precision >= 0) {
@@ -175,4 +196,4 @@ void TensorPrint<T>::print() const {
 
 }   // namespace TL
 
-#endif
+#endif  // TENSORLIB_TENSOR_PRINT_H_

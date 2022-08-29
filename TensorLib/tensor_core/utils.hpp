@@ -1,5 +1,5 @@
-#ifndef TENSORLIB_TENSOR_UTILS
-#define TENSORLIB_TENSOR_UTILS
+#ifndef TENSORLIB_TENSOR_UTILS_H_
+#define TENSORLIB_TENSOR_UTILS_H_
 
 #include <iostream>
 #include <vector>
@@ -10,7 +10,9 @@ namespace TL {
 using std::size_t;
 struct Range;
 
-constexpr bool All() { return true; }
+constexpr bool All() {
+    return true;
+}
 
 /** @brief A predicate function that applies the predicate to all the arguments. 
  * Useful for checking whether all the arguments can be converted into particular
@@ -21,7 +23,9 @@ constexpr bool All(bool b, Args... args) {
     return b && All(args...);
 }
 
-constexpr bool Some() { return false; }
+constexpr bool Some() {
+    return false;
+}
 
 /** 
  * Similar to @a All, but returns whether any one of the predicate satisfies.
@@ -74,4 +78,4 @@ std::ostream& operator<<(std::ostream& out, const std::vector<T>& vec) {
 
 }   // namespace TL
 
-#endif
+#endif  // TENSORLIB_TENSOR_UTILS_H_

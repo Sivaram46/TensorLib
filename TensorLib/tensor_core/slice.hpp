@@ -1,11 +1,17 @@
-#ifndef TENSORLIB_SLICE_CPP
-#define TENSORLIB_SLICE_CPP
+#ifndef TENSORLIB_SLICE_H_
+#define TENSORLIB_SLICE_H_
+
+#include "range.hpp"
+#include "utils.hpp"
 
 #include <type_traits>
 #include <vector>
-#include "range.cpp"
 
 namespace TL {
+
+/**************************************************
+                Slice declaration 
+ **************************************************/
 
 /**
  * Slice class that takes @a TL::Range and size_t and stores the ranges that will 
@@ -13,21 +19,30 @@ namespace TL {
  */
 struct Slice {
     template <typename... Dims,
-        typename = std::enable_if_t<TL::Slice_valid<Dims...>()>
+        typename = std::enable_if_t<Slice_valid<Dims...>()>
     >
-    Slice(Dims... dims) { put_range(dims...); }
+    Slice(Dims... dims) {
+        put_range(dims...);
+    }
+    
     std::vector<Range> ranges;
 private:
     /* Utility functions that will convert the given Dims... to Ranges */
-    void put_range(Range);
-    void put_range(size_t);
 
     template <typename... Dims>
     void put_range(Range, Dims...);
 
     template <typename... Dims>
     void put_range(size_t, Dims...);
+
+    void put_range(Range);
+
+    void put_range(size_t);
 };
+
+/**************************************************
+                Slice definition 
+ **************************************************/
 
 void Slice::put_range(Range r) {
     ranges.push_back(r);
@@ -51,4 +66,4 @@ void Slice::put_range(size_t s, Dims... dims) {
 
 }   // namespace TL
 
-#endif
+#endif  // TENSORLIB_SLICE_H_
