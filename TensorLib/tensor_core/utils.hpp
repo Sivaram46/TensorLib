@@ -59,8 +59,15 @@ constexpr bool Element_valid() {
     return All(Is_convertible<Args, size_t>()...);
 }
 
-template <bool B, typename T>
-using Enable_if = typename std::enable_if<B, T>::type;
+template <typename U>
+constexpr size_t product(U n) {
+    return n;
+}
+
+template <typename U, typename... Args>
+constexpr size_t product(U n, Args... args) {
+    return n * product(args...);
+}
 
 // Printing vectors of type size_t
 template <typename T>
